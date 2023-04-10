@@ -30,9 +30,11 @@ You can then launch the app in your preferred environment, whether it be an iOS 
 ## Configuration
 
 To use the OpenAI API, you need to provide an API key and organization ID. You can obtain these by signing up for OpenAI at https://openai.com/. Once you have your API key and organization ID, create a `secrets.json` file in the root of your project directory with the following contents:
-```
-OPENAI_ORGANIZATION=your_organization_id
-OPENAI_API_KEY=your_api_key
+```json
+{
+  "OPENAI_ORGANIZATION": "your_organization_id",
+  "OPENAI_API_KEY": "your_api_key"
+}
 ```
 
 Make sure to replace `your_organization_id` and `your_api_key` with your actual values.
