@@ -1,0 +1,4 @@
+# Ignore all directories that are not source code
+node_modules/
+android/
+ios/

@@ -1,9 +1,8 @@
 import { Configuration, OpenAIApi } from 'openai';
-import secrets from '../../secrets.json';
 
 const configuration = new Configuration({
-    organization: secrets.organization,
-    apiKey: secrets.apiKey,
+    organization: process.env.ORG_ID,
+    apiKey: process.env.API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
@@ -21,6 +20,13 @@ export const getBotResponse = async (message: string): Promise<Message> => {
   const errorMessage = "ERROR: Failed to receive a valid response from OpenAI."
 
   try {
+    if (process.env.DEBUG === 'true') {
+      return {
+        text: 'DEBUG=True: Automated message from bot.',
+        isBot: true,
+      }
+    }
+    
     const botResponse = await botResponsePromise;
     const botMessage = botResponse.data.choices[0].message;
     return {
