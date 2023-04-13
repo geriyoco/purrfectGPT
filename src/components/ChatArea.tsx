@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     textAlign: 'right',
     marginRight: 20,
-    marginBottom: 20,
+    height: 50,
   },
   messageItem: {
     flex: 1,
