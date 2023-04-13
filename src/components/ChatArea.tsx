@@ -8,8 +8,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import TypingText from './TypingText';
 
 
-type Message = {text: string, isBot: boolean};
-type MessageProps = {message: Message};
+type Message = { text: string, isBot: boolean };
+type MessageProps = { message: Message };
 
 function ChatArea() {
   const [messages, setMessages] = useState<Array<Message>>([]);
@@ -61,16 +61,16 @@ function ChatArea() {
           renderItem={({ item }) => <MessageItem message={item} />}
           contentContainerStyle={styles.messagesList}
           inverted={false}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-          onLayout={() => flatListRef.current?.scrollToEnd()}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
           ListFooterComponent={<View style={styles.listFooter}></View>}
           onScroll={handleScroll}
         />
       </View>
       <View style={styles.bottomContainer}>
         <View style={styles.endButtonContainer}>
-          {travelEndButton && 
-            <TouchableOpacity style={styles.endButton} onPress={() => flatListRef.current?.scrollToEnd()}>
+          {travelEndButton &&
+            <TouchableOpacity style={styles.endButton} onPress={() => flatListRef.current?.scrollToEnd({ animated: true })}>
               <FeatherIcon name="arrow-down-circle" size={20} color="#fff" />
             </TouchableOpacity>
           }
@@ -97,7 +97,7 @@ function ChatArea() {
 
 const MessageItem = (props: MessageProps) => {
   return (
-    <View style={props.message.isBot ? styles.botMessage : styles.userMessage}>
+    <View style={[styles.messageItem, props.message.isBot ? styles.botMessage : styles.userMessage]}>
       {props.message.isBot ?
         <MaterialCommunityIcons style={styles.icon} name="robot-outline" size={20} color="#fff" /> :
         <FeatherIcon style={styles.icon} name="user" size={20} color="#fff" />
@@ -122,18 +122,13 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   botMessage: {
-    flexDirection: 'row',
     backgroundColor: 'rgb(68,70,84)',
-    color: '#fff',
-    padding: 20
   },
   userMessage: {
-    flexDirection: 'row',
     backgroundColor: 'rgb(52,53,65)',
-    color: 'white',
-    padding: 20
   },
   textMessage: {
+    flexShrink: 1,
     color: 'white'
   },
   bottomContainer: {
@@ -182,6 +177,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     textAlign: 'right',
     marginRight: 20,
+    marginBottom: 20,
+  },
+  messageItem: {
+    flex: 1,
+    flexShrink: 1,
+    flexDirection: 'row',
+    color: 'white',
+    padding: 20
   }
 });
 
