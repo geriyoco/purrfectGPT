@@ -48,11 +48,23 @@ export const getBotResponse = async (message: string, messageHistory: Message[])
 export const extractBotMessage = (response: BotResponse): Message => {
   const botMessage = response?.data?.choices?.[0]?.message?.content;
   return {
-    text: botMessage ?? "ERROR: Failed to receive a valid response from OpenAI.",
     isBot: true,
+    text: botMessage ?? "ERROR: Failed to receive a valid response from OpenAI.",
+    created: response?.data.created,
+    model: response?.data.model,
+    usage: response?.data.usage,
   };
 };
 
+export const getPricing = (model: string, tokens: number): number => {
+  switch (model) {
+    case "gpt-3.5-turbo":
+      return 0.002 * tokens / 1000.0;
+    default:
+      break;
+  }
+  return 0.0;
+};
 
 const formatMessageForAPI = (message: Message): {role: ChatCompletionRequestMessageRoleEnum, content: string} => {
   return {
@@ -68,9 +80,9 @@ const mockResponse: BotResponse = {
     created: Math.floor(Date.now() / 1000),
     model: "gpt-3.5-turbo",
     usage: {
-      prompt_tokens: 0,
-      completion_tokens: 0,
-      total_tokens: 0,
+      prompt_tokens: 1,
+      completion_tokens: 2,
+      total_tokens: 3,
     },
     choices: [{
         "message": {
