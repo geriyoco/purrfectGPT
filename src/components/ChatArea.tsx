@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
-import { getBotResponse } from '../services/openai';
+import { getBotResponse, extractBotMessage } from '../services/openai';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import TypingText from './TypingText';
@@ -12,7 +12,7 @@ type Message = { text: string, isBot: boolean };
 type MessageProps = { message: Message };
 
 function ChatArea() {
-  const [messageHistory, setMessageHistory] = useState<Array<Message>>([]);
+  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [travelEndButton, setTravelEndButton] = useState(false);
 
@@ -24,7 +24,7 @@ function ChatArea() {
 
     const botResponsePromise = getBotResponse(currentMessage, messageHistory);
     botResponsePromise.then((botResponse) => {
-      setMessageHistory((prevMessages) => [...prevMessages, { text: botResponse.text, isBot: true }])
+      setMessageHistory((prevMessages) => [...prevMessages, extractBotMessage(botResponse)])
     });
 
     setCurrentMessage('');
