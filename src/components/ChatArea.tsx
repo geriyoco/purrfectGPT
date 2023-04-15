@@ -5,11 +5,9 @@ import { NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
 import { getBotResponse, extractBotMessage } from '../services/openai';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import TypingText from './TypingText';
-
-
-type Message = { text: string, isBot: boolean };
-type MessageProps = { message: Message };
+import { Message, MessageProps } from '../types/message';
 
 function ChatArea() {
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);

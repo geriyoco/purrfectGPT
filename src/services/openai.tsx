@@ -3,8 +3,8 @@ import { Configuration, OpenAIApi } from 'openai';
 import {
   ChatCompletionRequestMessageRoleEnum, CreateChatCompletionResponse,
 } from 'openai';
+import { Message } from '../types/message'
 
-type Message = {text: string, isBot: boolean};
 type BotResponse = AxiosResponse<CreateChatCompletionResponse, any> | null;
 
 const configuration = new Configuration({
