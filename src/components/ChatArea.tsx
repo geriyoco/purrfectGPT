@@ -1,13 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
-import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, TextInput, TouchableOpacity, View } from 'react-native';
 import { NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
-import { getBotResponse, extractBotMessage } from '../services/openai';
-import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
+import { getBotResponse, extractBotMessage } from '../services/openai';
+import MessageItem from './MessageItem';
+
 import TypingText from './TypingText';
-import { Message, MessageProps } from '../types/message';
+import { Message } from '../types/message';
 
 function ChatArea() {
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
@@ -69,7 +70,7 @@ function ChatArea() {
         <View style={styles.endButtonContainer}>
           {travelEndButton &&
             <TouchableOpacity style={styles.endButton} onPress={() => flatListRef.current?.scrollToEnd({ animated: true })}>
-              <FeatherIcon name="arrow-down-circle" size={20} color="#fff" />
+              <MaterialCommunityIcons name="arrow-down-circle" size={25} color="#fff" />
             </TouchableOpacity>
           }
         </View>
@@ -84,8 +85,8 @@ function ChatArea() {
             onChangeText={setCurrentMessage}
             onKeyPress={handleKeyDown}
           />
-          <TouchableOpacity disabled={!currentMessage} style={styles.button} onPress={handleSend}>
-            <FeatherIcon name="send" size={20} color="#fff" />
+          <TouchableOpacity disabled={!currentMessage} style={styles.sendButton} onPress={handleSend}>
+            <MaterialCommunityIcons name="send" size={16} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
@@ -93,17 +94,6 @@ function ChatArea() {
   );
 }
 
-const MessageItem = (props: MessageProps) => {
-  return (
-    <View style={[styles.messageItem, props.message.isBot ? styles.botMessage : styles.userMessage]}>
-      {props.message.isBot ?
-        <MaterialCommunityIcons style={styles.icon} name="robot-outline" size={20} color="#fff" /> :
-        <FeatherIcon style={styles.icon} name="user" size={20} color="#fff" />
-      }
-      <Text style={styles.textMessage}>{props.message.text}</Text>
-    </View>
-  );
-};
 
 const styles = StyleSheet.create({
   chatArea: {
@@ -118,16 +108,6 @@ const styles = StyleSheet.create({
   },
   messagesList: {
     paddingVertical: 0,
-  },
-  botMessage: {
-    backgroundColor: 'rgb(68,70,84)',
-  },
-  userMessage: {
-    backgroundColor: 'rgb(52,53,65)',
-  },
-  textMessage: {
-    flexShrink: 1,
-    color: 'white'
   },
   bottomContainer: {
     flexDirection: 'column',
@@ -157,13 +137,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(32,33,35,.5)',
     borderRadius: 10,
   },
-  button: {
+  sendButton: {
     backgroundColor: 'rgb(64,65,79)',
-    borderRadius: 10,
-    padding: 15,
-  },
-  icon: {
-    paddingRight: 15,
+    borderRadius: 8,
+    padding: 12,
   },
   listFooter: {
     padding: 20,
@@ -177,13 +154,6 @@ const styles = StyleSheet.create({
     marginRight: 20,
     marginBottom: 20,
   },
-  messageItem: {
-    flex: 1,
-    flexShrink: 1,
-    flexDirection: 'row',
-    color: 'white',
-    padding: 20
-  }
 });
 
 export default ChatArea;
