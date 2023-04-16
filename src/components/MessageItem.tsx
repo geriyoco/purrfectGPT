@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import { FlatList, Modal, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { dark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 
 import { CreateCompletionResponseUsage } from 'openai';
 import { Message } from '../types/message';
@@ -21,9 +28,7 @@ function MessageItem(props: {message: Message}) {
     />
   );
 
-  const MessageContent = (
-    <Text style={styles.textMessage}>{props.message.text}</Text>
-  );
+  const MessageContent = <MarkdownRenderedMessage text={props.message.text} />;
 
   return (
     <>
@@ -109,6 +114,44 @@ function MetadataPopup(props: {
   );
 }
 
+function MarkdownRenderedMessage(props: { text: string }) {
+  return (
+    <Text style={styles.markdownContainer}>
+      <ReactMarkdown
+        children={props.text}
+        components={{
+          p({ node, children, ...props }) {
+            return (
+              <Text {...props} style={{ marginVertical: 0 }}>
+                {children}
+              </Text>
+            );
+          },
+          code({node, inline, className, children, ...props}) {
+            const match = /language-(\w+)/.exec(className || '');
+            console.log(match);
+            return !inline && match ? (
+              <SyntaxHighlighter
+                {...props}
+                children={String(children).replace(/\n$/, '')}
+                style={dark}
+                language={match[1]}
+                PreTag="div"
+              />
+            ) : (
+              <code {...props} className={className}>
+                {children}
+              </code>
+            );
+          }
+        }}
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+      />
+    </Text>
+  );
+}
+
 const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   messageItem: {
@@ -165,6 +208,10 @@ const styles = StyleSheet.create({
     flex: 2,
     textAlign: 'right',
     marginLeft: 15,
+  },
+  markdownContainer: {
+    fontFamily: 'sans-serif',
+    fontSize: 16,
   },
 });
 
