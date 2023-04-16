@@ -12,7 +12,7 @@ type Message = { text: string, isBot: boolean };
 type MessageProps = { message: Message };
 
 function ChatArea() {
-  const [messages, setMessages] = useState<Array<Message>>([]);
+  const [messageHistory, setMessageHistory] = useState<Array<Message>>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [travelEndButton, setTravelEndButton] = useState(false);
 
@@ -20,11 +20,11 @@ function ChatArea() {
   const flatListRef = useRef<FlatList>(null);
 
   const handleSend = () => {
-    setMessages([...messages, { text: currentMessage, isBot: false }]);
+    setMessageHistory([...messageHistory, { text: currentMessage, isBot: false }]);
 
-    const botResponsePromise = getBotResponse(currentMessage);
+    const botResponsePromise = getBotResponse(currentMessage, messageHistory);
     botResponsePromise.then((botResponse) => {
-      setMessages((prevMessages) => [...prevMessages, { text: botResponse.text, isBot: true }])
+      setMessageHistory((prevMessages) => [...prevMessages, { text: botResponse.text, isBot: true }])
     });
 
     setCurrentMessage('');
@@ -56,7 +56,7 @@ function ChatArea() {
       <View style={styles.messagesContainer}>
         <FlatList
           ref={flatListRef}
-          data={messages}
+          data={messageHistory}
           keyExtractor={(_, index) => index.toString()}
           renderItem={({ item }) => <MessageItem message={item} />}
           contentContainerStyle={styles.messagesList}
