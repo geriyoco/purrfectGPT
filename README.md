@@ -16,7 +16,7 @@ Then navigate to the project directory:
 cd purrfectGPT
 ```
 
-Install the necessary dependencies using Yarn or NPM:
+Install the necessary dependencies using NPM:
 
 ```
 npm install
@@ -32,8 +32,8 @@ You can then launch the app in your preferred environment, whether it be an iOS 
 
 ## Configuration
 
-To use the OpenAI API, you need to provide an API key and organization ID. You can obtain these by signing up for OpenAI at https://openai.com/. Once you have your API key and organization ID, replace the contents of .env.sample with the organization ID and API key.
-Lastly, rename .env.sample to .env
+To use the OpenAI API, you need to provide an API key and organization ID. You can obtain these by signing up for OpenAI at https://openai.com/. Once you have your API key and organization ID, replace the contents of [`.env.sample`](.env.sample) with the organization ID and API key.
+Lastly, rename `.env.sample` to `.env`.
 
 ## Usage
 
