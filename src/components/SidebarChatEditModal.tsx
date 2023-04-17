@@ -19,7 +19,7 @@ function SidebarChatEditModal(props) {
       input.id === index ? { ...input, title: editName ? editName : input.title, folderId: folderId, edit: false } : input
     ))
     props.setFolders((prevState) => prevState.map((folder) =>
-      folder.id === folderId ? { ...folder, chats: folder.chats.includes(index) || [...folder.chats, index] } : { ...folder, chats: folder.chats.filter((id) => id !== index) }
+      folder.id === folderId ? { ...folder, chats: !folder.chats.includes(index) ? [...folder.chats, index] : folder.chats } : { ...folder, chats: folder.chats.filter((id) => id !== index) }
     ))
     closeWithoutSubmit(index)
   }
