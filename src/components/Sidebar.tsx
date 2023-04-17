@@ -1,95 +1,35 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { useWindowDimensions, FlatList, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
-import { CommonActions, useNavigation } from '@react-navigation/native';
-import {
-  createDrawerNavigator,
-  DrawerContentScrollView,
-  DrawerItemList,
-  DrawerItem,
-  DrawerActions
-} from '@react-navigation/drawer';
+import { v4 as uuidv4 } from 'uuid';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, useWindowDimensions, TouchableOpacity, View } from 'react-native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import ChatArea from './ChatArea';
-import Config from './Config';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import FeatherIcons from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Entypo from 'react-native-vector-icons/Entypo';
+import SidebarChat from './SidebarChat';
+import SidebarFolder from './SidebarFolder';
 
 function CustomDrawerContent(props: any) {
-  const clonedArray = structuredClone(props.screens)
-  const [screensDeepCopy, setScreensDeepCopy] = useState(clonedArray)
+  const [folders, setFolders] = useState<Array<{ id: string, title: string, chats: Array<string>, expand: boolean, edit: boolean }>>([])
+  const [newChat, setNewChat] = useState('')
 
   const addFolder = () => {
-    console.log('addFolder')
+    const folderId = uuidv4()
+    setFolders((prevState) => [...prevState, { id: folderId, title: `New Folder`, chats: [], expand: false, edit: false }])
   }
 
-  const addScreen = () => {
-    props.setScreens((prevState) => [
-      ...prevState,
-      { id: prevState.length + 1, name: `Chat ${prevState.length + 1}`, title: `Chat ${prevState.length + 1}`, component: 'chat' },
-    ]);
-    setScreensDeepCopy((prevState) => [
-      ...prevState,
-      { id: prevState.length + 1, name: `Chat ${prevState.length + 1}`, title: `Chat ${prevState.length + 1}`, component: 'chat', edit: false },
-    ]);
+  const addChat = () => {
+    const chatId = uuidv4()
+    props.setScreens((prevState) => [...prevState, { id: chatId, title: `New Chat`, folderId: '', edit: false, focus: true }]);
+    setNewChat(chatId)
   };
 
-  const onChangeText = (text, index) => {
-    setScreensDeepCopy((prevState) => {
-      return prevState.map((input) => input.id === index ? { ...input, title: text } : input)
-    })
-  }
+  useEffect(() => {
+    onTouch(newChat ? newChat : props.screens[0]["id"]);
+  }, [props.screens.length, newChat])
 
-  const editChat = (index) => {
-    setScreensDeepCopy((prevState) => {
-      return prevState.map((input) => input.id === index ? { ...input, edit: true } : input)
-    })
-  }
-  const deleteChat = () => {
-    console.log('deleteChat')
-  }
-
-  const handleSubmit = (text, index: number) => {
-    onChangeText(text, index)
-    onSubmit(index)
-  }
-
-  const onSubmit = (index) => {
-    setScreensDeepCopy((prevState) => {
-      prevState.forEach((screen) => {
-        if (screen.id === index) {
-          screen.edit = false;
-          if (!screen.title) {
-            screen.title = props.screens.filter(screen => screen.id === index)[0]["title"]
-          }
-        }
-      })
-      return prevState.map((input) => input.id === index ? { ...input, edit: false } : input)
-    })
-    props.setScreens((prevState) => {
-      screensDeepCopy.forEach((screen) => {
-        if (screen.id === index && screen.title) {
-          screen.title = prevState.filter(screen => screen.id === index)[0]["title"]
-        }
-      })
-      return [...prevState]
-    })
-    return
-  }
-
-
-  const onCancel = (index) => {
-    setScreensDeepCopy((prevState) => {
-      prevState.forEach((screen) => {
-        if (screen.id === index) {
-          screen.edit = false;
-          screen.title = props.screens.filter(screen => screen.id === index)[0]["title"]
-        }
-      })
-      return prevState.map((input) => input.id === index ? { ...input, edit: false } : input)
-    })
+  const onTouch = (index) => {
+    props.setScreens((prevState) => prevState.map((input) => input.id === index ? { ...input, focus: true } : { ...input, focus: false }))
+    props.navigation.navigate(index)
   }
 
   return (
@@ -98,73 +38,68 @@ function CustomDrawerContent(props: any) {
         <TouchableOpacity style={[styles.addButton, styles.addFolder]} onPress={addFolder}>
           <AntDesign name="addfolder" size={20} color='white' />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.addButton, styles.addChat]} onPress={addScreen}>
+        <TouchableOpacity style={[styles.addButton, styles.addChat]} onPress={addChat}>
           <MaterialCommunityIcons name="chat-plus-outline" size={20} color='white' />
         </TouchableOpacity>
       </View>
-      <View style={{ borderBottomWidth: 2, borderBottomColor: 'gray' }} />
+      <View style={styles.divider} />
       <View style={styles.drawerContentScrollView}>
-        {screensDeepCopy.map((screen) => {
-          return (
-            !screen.edit ?
-              (<TouchableOpacity key={screen.id} style={styles.chatButton} onPress={(e) => props.navigation.navigate(screen.name)}>
-                <View style={styles.drawerLabel}>
-                  <Ionicons name="chatbox-outline" size={20} color='white' />
-                  <Text style={styles.drawerText}>{screen.title}</Text>
-                  <View style={styles.drawerEndIcons} >
-                    <TouchableOpacity onPress={() => editChat(screen.id)}>
-                      <FeatherIcons name="edit-3" size={20} color='white' />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={deleteChat}>
-                      <FeatherIcons name="trash-2" size={20} color='white' />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </TouchableOpacity>) :
-              (<TouchableOpacity key={screen.id} style={styles.chatButton} onPress={() => props.navigation.navigate(screen.name)}>
-                <View style={styles.drawerLabel}>
-                  <Ionicons name="chatbox-outline" size={20} color='white' />
-                  <View style={styles.drawerTextContainer}>
-                    <TextInput
-                      style={styles.drawerTextInput}
-                      placeholder={screen.title}
-                      value={screen.title}
-                      onChangeText={(text) => onChangeText(text, screen.id)}
-                      onSubmitEditing={({ nativeEvent: { text, _eventCount, _target } }) => handleSubmit(text, screen.id)}
-                    />
-                  </View>
-                  <View style={styles.drawerEndIcons} >
-                    <TouchableOpacity onPress={() => onSubmit(screen.id)}>
-                      <Ionicons name="checkmark-sharp" size={20} color='white' />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => onCancel(screen.id)}>
-                      <Entypo name="cross" size={20} color='white' />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </TouchableOpacity>)
-          )
+        {folders && folders.map((folder, idx) => (
+          <SidebarFolder
+            key={folder.id}
+            folder={folder}
+            folders={folders}
+            setFolders={setFolders}
+            screens={props.screens}
+            setScreens={props.setScreens}
+            navigation={props.navigation}
+            addChat={addChat}
+            newChat={newChat}
+            setNewChat={setNewChat}
+            onTouch={onTouch}
+          />
+        ))}
+        {props.screens.map((screen, idx) => {
+          if (!screen.folderId) {
+            return (
+              <SidebarChat
+                key={screen.id}
+                screen={screen}
+                screens={props.screens}
+                setScreens={props.setScreens}
+                navigation={props.navigation}
+                folders={folders}
+                setFolders={setFolders}
+                newChat={newChat}
+                addChat={addChat}
+                setNewChat={setNewChat}
+                onTouch={onTouch}
+              />
+            )
+          }
+          return null
         })}
       </View>
-      <View style={{ borderBottomWidth: 2, borderBottomColor: 'gray' }} />
-    </View>
+      <View style={styles.divider} />
+      <View style={styles.footer} />
+    </View >
   );
 }
 
-const Drawer = createDrawerNavigator();
 
 function Sidebar() {
-  const dimensions = useWindowDimensions();
-  const isLargeScreen = dimensions.width >= 768;
+  const Drawer = createDrawerNavigator();
+  const { width, height } = useWindowDimensions();
+  const isLargeScreen = width >= 768;
   const [screens, setScreens] = useState([
-    { id: 1, name: 'Chat 1', title: 'help', component: 'chat' },
-    { id: 2, name: 'Chat 2', title: 'hello', component: 'chat' }
+    { id: uuidv4(), title: 'New Chat #1', folderId: '', edit: false, focus: true },
   ])
 
   return (
     <Drawer.Navigator
       useLegacyImplementation
       backBehavior="history"
+      initialRouteName="Feed"
       drawerContent={(props) => <CustomDrawerContent screens={screens} setScreens={setScreens} {...props} />}
       screenOptions={{
         drawerType: isLargeScreen ? 'permanent' : 'front',
@@ -175,10 +110,13 @@ function Sidebar() {
       {screens.map((screen) => (
         <Drawer.Screen
           key={screen.id}
-          name={screen.name}
-          component={screen.component === 'chat' ? ChatArea : Config}
+          name={screen.id}
+          children={() => <ChatArea screens={screens} setScreens={setScreens} />}
           options={{
             headerShown: !isLargeScreen,
+            headerStyle: styles.screenHeader,
+            headerTitleStyle: styles.screenHeaderTitle,
+            headerTintColor: 'purple',
             title: screen.title
           }} />
       ))}
@@ -190,39 +128,12 @@ const styles = StyleSheet.create({
   drawerStyleLargeScreen: {
     width: 300,
     backgroundColor: 'black',
+    borderRightColor: 'black',
   },
   drawerStyleSmallScreen: {
     flex: 1,
     width: '100%',
     backgroundColor: 'black',
-  },
-  drawerItem: {
-    color: 'gray',
-  },
-  drawerLabel: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  drawerText: {
-    flex: 0.85,
-    color: 'white',
-  },
-  drawerTextContainer: {
-    marginLeft: 9,
-    marginRight: -20,
-    marginBottom: 4,
-  },
-  drawerTextInput: {
-    flex: 1,
-    paddingLeft: 2,
-    paddingRight: 2,
-    color: 'white',
-  },
-  drawerEndIcons: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    gap: 10
   },
   newChat: {
     flexDirection: 'row',
@@ -245,19 +156,30 @@ const styles = StyleSheet.create({
   },
   drawerContentScrollView: {
     overflowY: 'auto',
-    height: 700,
+    flex: 1,
+    maxHeight: 700,
     margin: 10,
   },
   container: {
     flex: 1,
     flexDirection: 'column',
   },
-  chatButton: {
-    color: '#8f6dbd',
-    backgroundImage: 'linear-gradient(to right, #4776E6 0%, #8E54E9  51%, #4776E6  100%)',
-    borderRadius: 10,
-    margin: 10,
-    padding: 20
+  divider: {
+    height: 1,
+    width: '90%',
+    alignSelf: 'center',
+    backgroundColor: 'grey',
+    marginVertical: 5,
+  },
+  screenHeader: {
+    backgroundColor: 'black',
+    borderBottomColor: 'black',
+  },
+  screenHeaderTitle: {
+    color: 'white',
+  },
+  footer: {
+    minHeight: 100
   }
 })
 

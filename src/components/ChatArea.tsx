@@ -1,41 +1,14 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { FlatList, TextInput, TouchableOpacity, View } from 'react-native';
-import { NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-import { getBotResponse, extractBotMessage } from '../services/openai';
-import MessageItem from './MessageItem';
-
-import TypingText from './TypingText';
+import React, { useRef, useState, useContext, useEffect } from 'react';
+import { StyleSheet, FlatList, View } from 'react-native';
 import { Message } from '../types/message';
+import MessageItem from './MessageItem';
+import ChatAreaInput from './ChatAreaInput';
+import HomePage from './HomePage';
 
 function ChatArea() {
-  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
-  const [currentMessage, setCurrentMessage] = useState('');
-  const [travelEndButton, setTravelEndButton] = useState(false);
-
-  const inputRef = useRef<TextInput>(null);
   const flatListRef = useRef<FlatList>(null);
-
-  const handleSend = () => {
-    setMessageHistory([...messageHistory, { text: currentMessage, isBot: false }]);
-
-    const botResponsePromise = getBotResponse(currentMessage, messageHistory);
-    botResponsePromise.then((botResponse) => {
-      setMessageHistory((prevMessages) => [...prevMessages, extractBotMessage(botResponse)])
-    });
-
-    setCurrentMessage('');
-    inputRef.current?.focus();
-  };
-
-  const handleKeyDown = (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-    if (e.nativeEvent.key === 'Enter' && currentMessage && !e.nativeEvent.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
+  const [travelEndButton, setTravelEndButton] = useState(false);
 
   const handleScroll = (event: any) => {
     const offsetY = event.nativeEvent.contentOffset.y;
@@ -49,47 +22,33 @@ function ChatArea() {
     }
   };
 
+  const ChatAreaInputProps = {
+    flatListRef: flatListRef,
+    travelEndButton: travelEndButton,
+    messageHistory: messageHistory,
+    setMessageHistory: setMessageHistory,
+  }
 
   return (
     <View style={styles.chatArea}>
-      <View style={styles.messagesContainer}>
-        <FlatList
-          ref={flatListRef}
-          data={messageHistory}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={({ item }) => <MessageItem message={item} />}
-          contentContainerStyle={styles.messagesList}
-          inverted={false}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-          onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
-          ListFooterComponent={<View style={styles.listFooter}></View>}
-          onScroll={handleScroll}
-        />
-      </View>
-      <View style={styles.bottomContainer}>
-        <View style={styles.endButtonContainer}>
-          {travelEndButton &&
-            <TouchableOpacity style={styles.endButton} onPress={() => flatListRef.current?.scrollToEnd({ animated: true })}>
-              <MaterialCommunityIcons name="arrow-down-circle" size={25} color="#fff" />
-            </TouchableOpacity>
-          }
-        </View>
-        <View style={styles.inputContainer}>
-          <TextInput
-            ref={inputRef}
-            textAlignVertical="bottom"
-            multiline={true}
-            style={styles.input}
-            placeholder="Send a message..."
-            value={currentMessage}
-            onChangeText={setCurrentMessage}
-            onKeyPress={handleKeyDown}
+      {messageHistory.length ?
+        <View style={styles.messagesContainer}>
+          <FlatList
+            ref={flatListRef}
+            data={messageHistory}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item }) => <MessageItem message={item} />}
+            contentContainerStyle={styles.messagesList}
+            inverted={false}
+            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            ListFooterComponent={<View style={styles.listFooter}></View>}
+            onScroll={handleScroll}
           />
-          <TouchableOpacity disabled={!currentMessage} style={styles.sendButton} onPress={handleSend}>
-            <MaterialCommunityIcons name="send" size={16} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      </View>
+        </View> :
+        <HomePage />
+      }
+      <ChatAreaInput {...ChatAreaInputProps} />
     </View>
   );
 }
@@ -112,7 +71,7 @@ const styles = StyleSheet.create({
   bottomContainer: {
     flexDirection: 'column',
     justifyContent: 'center',
-    backgroundImage: 'linear-gradient(180deg,rgba(68,70,84,0.1),rgba(52,53,65) 58.85%)',
+    backgroundImage: 'linear-gradient(rgba(52,53,65,0),rgba(52,53,65) 50%)',
     position: 'absolute',
     bottom: 0,
     left: 0,
