@@ -4,7 +4,6 @@ import AntDesign from "react-native-vector-icons/AntDesign"
 import SidebarChat from "./SidebarChat"
 import SidebarFolderEditModal from "./SidebarFolderEditModal"
 
-// TODO: remove folder from chat (unselect folder)
 
 function SidebarFolder(props) {
   const toggleExpand = (index) => {
@@ -17,10 +16,10 @@ function SidebarFolder(props) {
 
   return (
     <TouchableOpacity
-      key={props.folder.id}
       style={styles.folderContainer}
       onPress={() => toggleExpand(props.folder.id)}
       onLongPress={() => editFolder(props.folder.id)}
+      delayLongPress={300}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         {props.folder.expand ?

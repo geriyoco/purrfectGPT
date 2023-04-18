@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, Dimensions, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { MultiSelect } from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
@@ -48,7 +48,7 @@ function SidebarFolderEditModal(props) {
               <View style={styles.editSection}>
                 <Text style={styles.editHeader}>Name</Text>
                 <TextInput
-                  style={editName === props.folder.title || !editName ? [styles.drawerTextInput, { color: 'gray' }] : [styles.drawerTextInput, { color: 'white' }]}
+                  style={editName === props.folder.title || !editName ? [styles.textInput, { color: 'gray' }] : [styles.textInput, { color: 'white' }]}
                   placeholder={props.folder.title}
                   value={editName}
                   onChangeText={setEditName}
@@ -63,7 +63,7 @@ function SidebarFolderEditModal(props) {
                   maxHeight={300}
                   backgroundColor='rgba(0,0,0,0.5)'
                   activeColor='gray'
-                  style={[styles.placeholder, { borderRadius: 10 }]}
+                  style={[styles.multiSelectContainer, { borderRadius: 10 }]}
                   placeholderStyle={{ color: 'white' }}
                   selectedTextStyle={styles.selectedTextStyle}
                   itemContainerStyle={{ borderRadius: 10 }}
@@ -111,7 +111,6 @@ function SidebarFolderEditModal(props) {
   )
 }
 
-const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   editModal: {
     flex: 1,
@@ -121,16 +120,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   editModalContainer: {
-    flex: 1,
     flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'rgb(200, 200, 200)',
     borderRadius: 10,
     padding: 20,
+    width: '100%',
     minWidth: 300,
-    maxWidth: width * 0.5,
-    maxHeight: height * 0.5
+    maxWidth: 400,
+    minHeight: 300,
+    maxHeight: 600
   },
   editTitle: {
     fontSize: 30,
@@ -141,16 +141,18 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
   },
   editFooter: {
+    marginTop: 20,
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'space-between',
   },
-  drawerTextInput: {
+  textInput: {
     backgroundColor: 'black',
+    alignSelf: 'stretch',
     borderRadius: 10,
     padding: 10,
-    height: 40,
-    alignSelf: 'stretch'
+    height: 55,
+    marginBottom: 40,
   },
   editSection: {
     flexDirection: 'column',
@@ -177,11 +179,10 @@ const styles = StyleSheet.create({
   folderIcon: {
     marginRight: 10
   },
-  placeholder: {
+  multiSelectContainer: {
     backgroundColor: 'black',
     color: 'white',
     padding: 10,
-    height: 40
   },
   submit: {
     fontFamily: 'cursive'
@@ -199,20 +200,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 14,
+    borderRadius: 15,
     backgroundColor: 'white',
     shadowColor: '#000',
-    marginTop: 8,
-    marginRight: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    padding: 10,
+    margin: 5,
+    marginLeft: 40,
     shadowOffset: {
       width: 0,
       height: 1,
     },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
-
     elevation: 2,
   },
   textSelectedStyle: {

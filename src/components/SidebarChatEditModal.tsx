@@ -19,7 +19,9 @@ function SidebarChatEditModal(props) {
       input.id === index ? { ...input, title: editName ? editName : input.title, folderId: folderId, edit: false } : input
     ))
     props.setFolders((prevState) => prevState.map((folder) =>
-      folder.id === folderId ? { ...folder, chats: !folder.chats.includes(index) ? [...folder.chats, index] : folder.chats } : { ...folder, chats: folder.chats.filter((id) => id !== index) }
+      folder.id === folderId ?
+        { ...folder, chats: !folder.chats.includes(index) ? [...folder.chats, index] : folder.chats } :
+        { ...folder, chats: folder.chats.filter((id) => id !== index) }
     ))
     closeWithoutSubmit(index)
   }
@@ -31,6 +33,11 @@ function SidebarChatEditModal(props) {
     props.setScreens((prevState) => prevState.filter(obj => obj.id !== index))
     props.setFolders((prevState) => prevState.map(folder => folder.id === props.screen.folderId ? { ...folder, chats: folder.chats.filter(id => id !== index) } : folder))
     props.setNewChat('')
+  }
+
+  const unSelect = (item, selected) => {
+    !selected && item.id ? setFolderId(item.id) : setFolderId('')
+    setIsFocus(false)
   }
 
 
@@ -49,7 +56,7 @@ function SidebarChatEditModal(props) {
               <View style={styles.editSection}>
                 <Text style={styles.editHeader}>Name</Text>
                 <TextInput
-                  style={editName === props.screen.title || !editName ? [styles.drawerTextInput, { color: 'gray' }] : [styles.drawerTextInput, { color: 'white' }]}
+                  style={editName === props.screen.title || !editName ? [styles.textInput, { color: 'gray' }] : [styles.textInput, { color: 'white' }]}
                   placeholder={props.screen.title}
                   value={editName}
                   onChangeText={setEditName}
@@ -66,7 +73,7 @@ function SidebarChatEditModal(props) {
                     backgroundColor='rgba(0,0,0,0.5)'
                     activeColor='gray'
                     placeholderStyle={{ color: 'white' }}
-                    style={[styles.placeholder, { borderRadius: 10 }]}
+                    style={[styles.dropdownContainer, { borderRadius: 10 }]}
                     selectedTextStyle={styles.selectedTextStyle}
                     itemContainerStyle={{ borderRadius: 10 }}
                     containerStyle={styles.container}
@@ -79,6 +86,23 @@ function SidebarChatEditModal(props) {
                     onChange={item => {
                       setFolderId(item.id);
                       setIsFocus(false);
+                    }}
+                    renderItem={(item, selected) => {
+                      return (
+                        <TouchableOpacity onPress={() => unSelect(item, selected)}>
+                          <View style={styles.item}>
+                            <Text style={styles.textItem}>{item.title}</Text>
+                            {item.value === folderId && (
+                              <AntDesign
+                                style={styles.icon}
+                                color="black"
+                                name="Safety"
+                                size={20}
+                              />
+                            )}
+                          </View>
+                        </TouchableOpacity>
+                      )
                     }}
                     renderLeftIcon={() => (
                       <AntDesign
@@ -124,9 +148,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(200, 200, 200)',
     borderRadius: 10,
     padding: 20,
+    width: '100%',
     minWidth: 300,
-    maxWidth: width * 0.5,
-    maxHeight: height * 0.5
+    maxWidth: 400,
+    maxHeight: 400,
   },
   editTitle: {
     fontSize: 30,
@@ -140,12 +165,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'space-between',
+    marginTop: 20,
   },
-  drawerTextInput: {
+  textInput: {
     backgroundColor: 'black',
     borderRadius: 10,
     padding: 10,
-    height: 40,
+    height: 55,
+    marginBottom: 40,
     alignSelf: 'stretch'
   },
   editSection: {
@@ -173,11 +200,10 @@ const styles = StyleSheet.create({
   folderIcon: {
     marginRight: 10
   },
-  placeholder: {
+  dropdownContainer: {
     backgroundColor: 'black',
     color: 'white',
     padding: 10,
-    height: 40
   },
   submit: {
     fontFamily: 'cursive'
@@ -190,6 +216,19 @@ const styles = StyleSheet.create({
   },
   container: {
     borderRadius: 10,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  item: {
+    padding: 17,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  textItem: {
+    flex: 1,
+    fontSize: 16,
   },
 })
 

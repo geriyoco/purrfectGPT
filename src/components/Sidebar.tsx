@@ -1,10 +1,10 @@
-import { v4 as uuidv4 } from 'uuid';
 import React, { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { StyleSheet, useWindowDimensions, TouchableOpacity, View } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import ChatArea from './ChatArea';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import ChatArea from './ChatArea';
 import SidebarChat from './SidebarChat';
 import SidebarFolder from './SidebarFolder';
 
@@ -92,7 +92,7 @@ function Sidebar() {
   const { width, height } = useWindowDimensions();
   const isLargeScreen = width >= 768;
   const [screens, setScreens] = useState([
-    { id: uuidv4(), title: 'New Chat #1', folderId: '', edit: false, focus: true },
+    { id: uuidv4(), title: 'New Chat', folderId: '', edit: false, focus: true },
   ])
 
   return (
@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
   },
   screenHeaderTitle: {
     color: 'white',
+    textOverflow: 'ellipsis',
   },
   footer: {
     minHeight: 100
