@@ -1,53 +1,39 @@
-import { NavigationProp, ParamListBase } from "@react-navigation/native";
+import { DrawerContentComponentProps } from "@react-navigation/drawer"
 
 export type Screen = {
-  id: string;
-  title: string;
-  edit: boolean;
-  folderId: string;
-  focus:  boolean;
-};
+  id: string
+  title: string
+  edit: boolean
+  folderId: string
+  focus: boolean
+}
 
 export type Folder = {
-  id: string;
-  title: string;
-  edit: boolean;
-  chats: string[];
-  expand: boolean;
-};
-
-export interface SidebarBaseProps {
-  screens: Screen[];
-  setScreens: (value: (prevState: Screen[]) => Screen[]) => void;
-  folders: Folder[];
-  setFolders: (value: (prevState: Folder[]) => Folder[]) => void;
-  setNewChat: (value: string) => void;
-  addChat: () => void;
+  id: string
+  title: string
+  edit: boolean
+  chatIds: string[]
+  expand: boolean
 }
 
-export interface SidebarChatEditModalProps extends SidebarBaseProps {
-  onTouch: (screenId: string) => void;
-  screen: Screen;
+export interface SidebarProps extends DrawerContentComponentProps {
+  screens: Screen[]
+  setScreens: (value: (prevState: Screen[]) => Screen[]) => void
 }
 
-export interface SidebarChatProps extends SidebarBaseProps {
-  onTouch: (screenId: string) => void;
-  screen: Screen;
-  navigation: NavigationProp<ParamListBase>;
-  newChat: string;
+export interface SidebarDrawerContentProps extends SidebarProps {
+  folders: Folder[]
+  setFolders: (value: (prevState: Folder[]) => Folder[]) => void
+  addChat: () => void
+  newChat: string
+  setNewChat: (value: string) => void
+  onChatTouch: (screenId: string) => void
 }
 
-export interface SidebarFolderEditModalProps extends SidebarBaseProps {
-  folder: Folder;
+export interface SidebarChatProps extends SidebarDrawerContentProps {
+  screen: Screen
 }
 
-export interface SidebarFolderProps extends SidebarBaseProps {
-  onTouch: (screenId: string) => void;
-  folder: Folder;
-  navigation: NavigationProp<ParamListBase>;
-  newChat: string;
-}
-
-export interface SidebarDrawerContent extends SidebarBaseProps {
-  navigation: NavigationProp<ParamListBase>;
+export interface SidebarFolderProps extends SidebarDrawerContentProps {
+  folder: Folder
 }

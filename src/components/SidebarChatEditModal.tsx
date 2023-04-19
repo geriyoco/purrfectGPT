@@ -11,9 +11,9 @@ import {
 } from "react-native";
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { Folder, SidebarChatEditModalProps } from '../types/sidebar';
+import { Folder, SidebarChatProps } from '../types/sidebar';
 
-function SidebarChatEditModal(props: SidebarChatEditModalProps) {
+function SidebarChatEditModal(props: SidebarChatProps) {
   const [editName, setEditName] = useState(props.screen.title)
   const [visible, setVisible] = useState(props.screen.edit)
   const [folderId, setFolderId] = useState(props.screen.folderId);
@@ -30,8 +30,8 @@ function SidebarChatEditModal(props: SidebarChatEditModalProps) {
     ))
     props.setFolders((prevState) => prevState.map((folder) =>
       folder.id === folderId ?
-        { ...folder, chats: !folder.chats.includes(index) ? [...folder.chats, index] : folder.chats } :
-        { ...folder, chats: folder.chats.filter((id) => id !== index) }
+        { ...folder, chats: !folder.chatIds.includes(index) ? [...folder.chatIds, index] : folder.chatIds, expand: true } :
+        { ...folder, chats: folder.chatIds.filter((id) => id !== index) }
     ))
     closeWithoutSubmit(index)
   }
@@ -41,7 +41,7 @@ function SidebarChatEditModal(props: SidebarChatEditModalProps) {
       props.addChat()
     }
     props.setScreens((prevState) => prevState.filter(obj => obj.id !== index))
-    props.setFolders((prevState) => prevState.map(folder => folder.id === props.screen.folderId ? { ...folder, chats: folder.chats.filter(id => id !== index) } : folder))
+    props.setFolders((prevState) => prevState.map(folder => folder.id === props.screen.folderId ? { ...folder, chatIds: folder.chatIds.filter(id => id !== index) } : folder))
     props.setNewChat('')
   }
 

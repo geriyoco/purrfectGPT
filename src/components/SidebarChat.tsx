@@ -14,7 +14,7 @@ function SidebarChat(props: SidebarChatProps) {
   return (
     <TouchableOpacity
       style={[styles.button, props.screen.focus && styles.focus]}
-      onPress={() => props.onTouch(props.screen.id)}
+      onPress={() => props.onChatTouch(props.screen.id)}
       onLongPress={() => editChat(props.screen.id)}
       delayLongPress={200}
     >

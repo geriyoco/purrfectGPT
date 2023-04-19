@@ -5,15 +5,15 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import AntDesign from "react-native-vector-icons/AntDesign"
 import SidebarChat from "./SidebarChat"
 import SidebarFolder from "./SidebarFolder"
-import { SidebarDrawerContent } from "../types/sidebar"
+import { SidebarProps, Folder } from "../types/sidebar"
 
-function SidebarDrawerContent(props: SidebarDrawerContent) {
-  const [folders, setFolders] = useState<Array<{ id: string; title: string; chats: Array<string>; expand: boolean; edit: boolean }>>([])
+function SidebarDrawerContent(props: SidebarProps) {
+  const [folders, setFolders] = useState<Array<Folder>>([])
   const [newChat, setNewChat] = useState("")
 
   const addFolder = () => {
     const folderId = uuidv4()
-    setFolders((prevState) => [...prevState, { id: folderId, title: `New Folder`, chats: [], expand: false, edit: false }])
+    setFolders((prevState) => [...prevState, { id: folderId, title: `New Folder`, chatIds: [], expand: false, edit: false }])
   }
 
   const addChat = () => {
@@ -28,9 +28,18 @@ function SidebarDrawerContent(props: SidebarDrawerContent) {
 
   const onTouch = (index: string) => {
     props.setScreens((prevState =>
-      prevState.map((input: { id: any }) => (input.id === index ? { ...input, focus: true } : { ...input, focus: false }))
-    )
+      prevState.map((input) => (input.id === index ? { ...input, focus: true } : { ...input, focus: false }))
+    ))
     props.navigation.navigate(index);
+  }
+
+  const SidebarDrawerContentProps = {
+    folders: folders,
+    setFolders: setFolders,
+    addChat: addChat,
+    newChat: newChat,
+    setNewChat: setNewChat,
+    onChatTouch: onTouch,
   }
 
   return (
@@ -50,15 +59,8 @@ function SidebarDrawerContent(props: SidebarDrawerContent) {
             <SidebarFolder
               key={folder.id}
               folder={folder}
-              folders={folders}
-              setFolders={setFolders}
-              screens={props.screens}
-              setScreens={props.setScreens}
-              navigation={props.navigation}
-              addChat={addChat}
-              newChat={newChat}
-              setNewChat={setNewChat}
-              onTouch={onTouch}
+              {...SidebarDrawerContentProps}
+              {...props}
             />
           ))}
         {props.screens.map((screen, _idx) => {
@@ -67,15 +69,8 @@ function SidebarDrawerContent(props: SidebarDrawerContent) {
               <SidebarChat
                 key={screen.id}
                 screen={screen}
-                screens={props.screens}
-                setScreens={props.setScreens}
-                navigation={props.navigation}
-                folders={folders}
-                setFolders={setFolders}
-                newChat={newChat}
-                addChat={addChat}
-                setNewChat={setNewChat}
-                onTouch={onTouch}
+                {...SidebarDrawerContentProps}
+                {...props}
               />
             )
           }

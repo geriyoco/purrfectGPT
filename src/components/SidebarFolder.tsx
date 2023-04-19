@@ -15,49 +15,66 @@ function SidebarFolder(props: SidebarFolderProps) {
   }
 
   return (
-    <TouchableOpacity
-      style={styles.folderContainer}
-      onPress={() => toggleExpand(props.folder.id)}
-      onLongPress={() => editFolder(props.folder.id)}
-      delayLongPress={300}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {props.folder.expand ?
-          (<AntDesign style={styles.folderIcon} name="down" size={10} color='white' />) :
-          (<AntDesign style={styles.folderIcon} name="right" size={10} color='white' />)
+    <View style={styles.folderContainer}>
+      <TouchableOpacity
+        onPress={() => toggleExpand(props.folder.id)}
+        onLongPress={() => editFolder(props.folder.id)}
+        delayLongPress={300}
+      >
+        <View style={styles.folderHeader}>
+          {props.folder.expand ?
+            (<AntDesign style={styles.folderIcon} name="down" size={10} color='white' />) :
+            (<AntDesign style={styles.folderIcon} name="right" size={10} color='white' />)
+          }
+          <Text style={styles.folderTitle}>{props.folder.title}</Text>
+        </View>
+      </TouchableOpacity>
+      <View style={styles.folderContents}>
+        <View style={styles.chatsContainer}>
+          {props.folder.expand && props.folder.chatIds.length !== 0 && props.screens.filter((screen) => props.folder.chatIds.includes(screen.id)).map((screen) => (
+            <View style={styles.chatItem} key={screen.id}>
+              <View style={styles.verticalDivider}></View>
+              <View style={{ flex: 1 }}>
+                <SidebarChat screen={screen} {...props} />
+              </View>
+            </View >
+          ))}
+        </View>
+        {props.folder.edit &&
+          <SidebarFolderEditModal {...props} />
         }
-        <Text style={styles.folderTitle}>{props.folder.title}</Text>
       </View>
-      <View style={{ width: '100%', flexDirection: 'column' }}>
-        {props.folder.expand && props.folder.chats.length !== 0 && props.screens.filter((screen) => props.folder.chats.includes(screen.id)).map((screen) => (
-          <View style={{ width: '100%', flexDirection: 'row' }} key={screen.id}>
-            <View style={styles.verticalDivider}></View>
-            <View style={{ flex: 1 }}>
-              <SidebarChat screen={screen} {...props} />
-            </View>
-          </View >
-        ))}
-      </View>
-      {props.folder.edit &&
-        <SidebarFolderEditModal {...props} />
-      }
-    </TouchableOpacity>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   folderContainer: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    backgroundColor: 'black',
     margin: 2,
     padding: 2
+  },
+  folderHeader: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  folderIcon: {
+    marginRight: 10,
   },
   folderTitle: {
     color: 'gray',
   },
-  folderIcon: {
-    marginRight: 10,
+  folderContents: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    backgroundColor: 'black',
+  },
+  chatsContainer: {
+    width: '100%',
+    flexDirection: 'column'
+  },
+  chatItem: {
+    width: '100%',
+    flexDirection: 'row'
   },
   verticalDivider: {
     margin: 4.5,
