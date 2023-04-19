@@ -1,41 +1,43 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
-import { useWindowDimensions } from 'react-native';
-import {
-  createDrawerNavigator,
-  DrawerContentScrollView,
-  DrawerItemList,
-  DrawerItem,
-} from '@react-navigation/drawer';
+import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { StyleSheet, useWindowDimensions } from 'react-native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import ChatArea from './ChatArea';
-import Config from './Config';
-
-function CustomDrawerContent(props: any) {
-  return (
-    <DrawerContentScrollView {...props}>
-      <DrawerItemList {...props} />
-    </DrawerContentScrollView>
-  );
-}
-const Drawer = createDrawerNavigator();
+import SidebarDrawerContent from './SidebarDrawerContent';
 
 function Sidebar() {
-  const dimensions = useWindowDimensions();
-  const isLargeScreen = dimensions.width >= 768;
+  const Drawer = createDrawerNavigator();
+  const { width, height } = useWindowDimensions();
+  const isLargeScreen = width >= 768;
+  const [screens, setScreens] = useState([
+    { id: uuidv4(), title: 'New Chat', folderId: '', edit: false, focus: true },
+  ])
 
   return (
     <Drawer.Navigator
       useLegacyImplementation
       backBehavior="history"
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      initialRouteName="Feed"
+      drawerContent={(props) => <SidebarDrawerContent screens={screens} setScreens={setScreens} {...props} />}
       screenOptions={{
         drawerType: isLargeScreen ? 'permanent' : 'front',
         drawerStyle: isLargeScreen ? styles.drawerStyleLargeScreen : styles.drawerStyleSmallScreen,
-        overlayColor: 'transparent',
+        drawerActiveTintColor: 'white',
       }}
     >
-      <Drawer.Screen name="purrfectChat" component={ChatArea} options={{ headerShown: false }} />
-      <Drawer.Screen name="Config" component={Config} options={{ headerShown: false }} />
+      {screens.map((screen) => (
+        <Drawer.Screen
+          key={screen.id}
+          name={screen.id}
+          children={() => <ChatArea />}
+          options={{
+            headerShown: !isLargeScreen,
+            headerStyle: styles.screenHeader,
+            headerTitleStyle: styles.screenHeaderTitle,
+            headerTintColor: 'purple',
+            title: screen.title
+          }} />
+      ))}
     </Drawer.Navigator>
   );
 }
@@ -44,13 +46,20 @@ const styles = StyleSheet.create({
   drawerStyleLargeScreen: {
     width: 300,
     backgroundColor: 'black',
-    padding: 10,
+    borderRightColor: 'black',
   },
   drawerStyleSmallScreen: {
     flex: 1,
     width: '100%',
     backgroundColor: 'black',
-    padding: 10,
+  },
+  screenHeader: {
+    backgroundColor: 'black',
+    borderBottomColor: 'black',
+  },
+  screenHeaderTitle: {
+    color: 'white',
+    textOverflow: 'ellipsis',
   },
 })
 

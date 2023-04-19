@@ -1,6 +1,6 @@
 import React from 'react';
-import Sidebar from './Sidebar';
 import { NavigationContainer } from '@react-navigation/native';
+import Sidebar from './Sidebar';
 
 function ChatInterface() {
   return (
