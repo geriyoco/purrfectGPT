@@ -5,8 +5,9 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import AntDesign from "react-native-vector-icons/AntDesign"
 import SidebarChat from "./SidebarChat"
 import SidebarFolder from "./SidebarFolder"
+import { SidebarDrawerContent } from "../types/sidebar"
 
-function SidebarDrawerContent(props) {
+function SidebarDrawerContent(props: SidebarDrawerContent) {
   const [folders, setFolders] = useState<Array<{ id: string; title: string; chats: Array<string>; expand: boolean; edit: boolean }>>([])
   const [newChat, setNewChat] = useState("")
 
@@ -25,11 +26,11 @@ function SidebarDrawerContent(props) {
     onTouch(newChat ? newChat : props.screens[0]["id"])
   }, [props.screens.length, newChat])
 
-  const onTouch = (index: any) => {
-    props.setScreens((prevState: any[]) =>
+  const onTouch = (index: string) => {
+    props.setScreens((prevState =>
       prevState.map((input: { id: any }) => (input.id === index ? { ...input, focus: true } : { ...input, focus: false }))
     )
-    props.navigation.navigate(index)
+    props.navigation.navigate(index);
   }
 
   return (
@@ -45,7 +46,7 @@ function SidebarDrawerContent(props) {
       <View style={styles.divider} />
       <View style={styles.drawerContentScrollView}>
         {folders &&
-          folders.map((folder, idx) => (
+          folders.map((folder, _idx) => (
             <SidebarFolder
               key={folder.id}
               folder={folder}
@@ -60,7 +61,7 @@ function SidebarDrawerContent(props) {
               onTouch={onTouch}
             />
           ))}
-        {props.screens.map((screen: { folderId: any; id: any }, idx: any) => {
+        {props.screens.map((screen, _idx) => {
           if (!screen.folderId) {
             return (
               <SidebarChat

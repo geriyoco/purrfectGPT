@@ -1,16 +1,16 @@
-import React from 'react';
+import React from "react";
 import { TouchableOpacity, View, StyleSheet, Text } from "react-native"
 import AntDesign from "react-native-vector-icons/AntDesign"
 import SidebarChat from "./SidebarChat"
 import SidebarFolderEditModal from "./SidebarFolderEditModal"
+import { SidebarFolderProps } from "../types/sidebar";
 
-
-function SidebarFolder(props) {
-  const toggleExpand = (index) => {
+function SidebarFolder(props: SidebarFolderProps) {
+  const toggleExpand = (index: string) => {
     props.setFolders((prevState) => prevState.map((input) => input.id === index ? { ...input, expand: !input.expand } : input))
   }
 
-  const editFolder = (index) => {
+  const editFolder = (index: string) => {
     props.setFolders((prevState) => prevState.map((input) => input.id === index ? { ...input, edit: true } : input))
   }
 
@@ -33,32 +33,13 @@ function SidebarFolder(props) {
           <View style={{ width: '100%', flexDirection: 'row' }} key={screen.id}>
             <View style={styles.verticalDivider}></View>
             <View style={{ flex: 1 }}>
-              <SidebarChat
-                screen={screen}
-                screens={props.screens}
-                setScreens={props.setScreens}
-                navigation={props.navigation}
-                folders={props.folders}
-                setFolders={props.setFolders}
-                newChat={props.newChat}
-                addChat={props.addChat}
-                setNewChat={props.setNewChat}
-                onTouch={props.onTouch}
-              />
+              <SidebarChat screen={screen} {...props} />
             </View>
           </View >
         ))}
       </View>
       {props.folder.edit &&
-        <SidebarFolderEditModal
-          folder={props.folder}
-          folders={props.folders}
-          setFolders={props.setFolders}
-          screens={props.screens}
-          setScreens={props.setScreens}
-          addChat={props.addChat}
-          setNewChat={props.setNewChat}
-        />
+        <SidebarFolderEditModal {...props} />
       }
     </TouchableOpacity>
   )

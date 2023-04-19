@@ -5,6 +5,5 @@ module.exports = {
   extends: ["@react-native-community", "plugin:@typescript-eslint/recommended", "plugin:prettier/recommended"],
   rules: {
     printWidth: 150,
-    // Your custom rules here
   },
 }

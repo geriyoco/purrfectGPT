@@ -2,10 +2,13 @@ import React from "react"
 import { TouchableOpacity, View, Text, StyleSheet } from "react-native"
 import Ionicons from "react-native-vector-icons/Ionicons"
 import SidebarChatEditModal from "./SidebarChatEditModal"
+import { SidebarChatProps } from "../types/sidebar"
 
-function SidebarChat(props) {
-  const editChat = (index: any) => {
-    props.setScreens((prevState: any[]) => prevState.map((input: { id: any }) => (input.id === index ? { ...input, edit: true } : input)))
+function SidebarChat(props: SidebarChatProps) {
+  const editChat = (index: string) => {
+    props.setScreens((prevState) => prevState.map(
+      (input) => (input.id === index ? { ...input, edit: true } : input)
+    ))
   }
 
   return (
@@ -17,17 +20,15 @@ function SidebarChat(props) {
     >
       <View style={[styles.label]}>
         <Ionicons style={styles.icon} name="chatbox-outline" size={20} color="white" />
-        <Text style={styles.title}>{props.screen.title}</Text>
+        <Text
+          style={styles.title}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {props.screen.title}
+        </Text>
         {props.screen.edit && (
-          <SidebarChatEditModal
-            screen={props.screen}
-            screens={props.screens}
-            setScreens={props.setScreens}
-            setFolders={props.setFolders}
-            folders={props.folders}
-            addChat={props.addChat}
-            setNewChat={props.setNewChat}
-          />
+          <SidebarChatEditModal {...props} />
         )}
       </View>
     </TouchableOpacity>
@@ -46,8 +47,6 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     color: "white",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
     overflow: "hidden",
   },
   button: {

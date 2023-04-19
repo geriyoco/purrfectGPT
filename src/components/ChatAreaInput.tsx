@@ -9,7 +9,11 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getBotResponse, extractBotMessage } from '../services/openai';
+import { Message } from '../types/message';
 
+export interface ExtendedTextInputKeyPressEventData extends TextInputKeyPressEventData {
+  shiftKey?: boolean;
+}
 
 function ChatAreaInput(props: any) {
   const [currentMessage, setCurrentMessage] = useState('');
@@ -21,14 +25,14 @@ function ChatAreaInput(props: any) {
 
     const botResponsePromise = getBotResponse(currentMessage, props.messageHistory);
     botResponsePromise.then((botResponse) => {
-      props.setMessageHistory((prevMessages) => [...prevMessages, extractBotMessage(botResponse)])
+      props.setMessageHistory((prevMessages: Message[]) => [...prevMessages, extractBotMessage(botResponse)])
     });
 
     setCurrentMessage('');
     inputRef.current?.focus();
   };
 
-  const handleKeyDown = (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+  const handleKeyDown = (e: NativeSyntheticEvent<ExtendedTextInputKeyPressEventData>) => {
     if (e.nativeEvent.key === 'Enter' && currentMessage && !e.nativeEvent.shiftKey) {
       e.preventDefault();
       handleSend();

@@ -1,20 +1,30 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, Dimensions, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Dimensions,
+  StyleSheet,
+  TouchableWithoutFeedback
+} from "react-native";
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { Folder, SidebarChatEditModalProps } from '../types/sidebar';
 
-function SidebarChatEditModal(props) {
+function SidebarChatEditModal(props: SidebarChatEditModalProps) {
   const [editName, setEditName] = useState(props.screen.title)
   const [visible, setVisible] = useState(props.screen.edit)
   const [folderId, setFolderId] = useState(props.screen.folderId);
   const [isFocus, setIsFocus] = useState(false);
 
-  const closeWithoutSubmit = (index) => {
+  const closeWithoutSubmit = (index: string) => {
     props.setScreens((prevState) => prevState.map((input) => input.id === index ? { ...input, edit: false } : input))
     setVisible(false)
   }
 
-  const onSubmit = (index) => {
+  const onSubmit = (index: string) => {
     props.setScreens((prevState) => prevState.map((input) =>
       input.id === index ? { ...input, title: editName ? editName : input.title, folderId: folderId, edit: false } : input
     ))
@@ -26,7 +36,7 @@ function SidebarChatEditModal(props) {
     closeWithoutSubmit(index)
   }
 
-  const onDelete = (index) => {
+  const onDelete = (index: string) => {
     if (props.screens.length === 1) {
       props.addChat()
     }
@@ -35,7 +45,7 @@ function SidebarChatEditModal(props) {
     props.setNewChat('')
   }
 
-  const unSelect = (item, selected) => {
+  const unSelect = (item: Folder, selected: boolean) => {
     !selected && item.id ? setFolderId(item.id) : setFolderId('')
     setIsFocus(false)
   }
@@ -87,12 +97,12 @@ function SidebarChatEditModal(props) {
                       setFolderId(item.id);
                       setIsFocus(false);
                     }}
-                    renderItem={(item, selected) => {
+                    renderItem={(item: Folder, selected: boolean = false) => {
                       return (
                         <TouchableOpacity onPress={() => unSelect(item, selected)}>
                           <View style={styles.item}>
                             <Text style={styles.textItem}>{item.title}</Text>
-                            {item.value === folderId && (
+                            {item.id === folderId && (
                               <AntDesign
                                 style={styles.icon}
                                 color="black"

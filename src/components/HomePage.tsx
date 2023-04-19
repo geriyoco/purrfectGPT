@@ -4,7 +4,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 function HomePage() {
   return (
     <View style={styles.chatArea}>
-      <Text style={styles.header}> Welcome to the purrfect chat! </Text>
+      <Text style={styles.header}> Welcome to the purrfectGPT! </Text>
       <FontAwesome5 style={styles.icon} name="cat" size={100} color="#fff" />
       <Text style={styles.caption}> Start by typing below! </Text>
     </View>

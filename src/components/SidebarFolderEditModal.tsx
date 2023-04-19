@@ -2,19 +2,20 @@ import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { MultiSelect } from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { SidebarFolderEditModalProps } from '../types/sidebar';
 
-function SidebarFolderEditModal(props) {
+function SidebarFolderEditModal(props: SidebarFolderEditModalProps) {
   const [editName, setEditName] = useState(props.folder.title)
   const [visible, setVisible] = useState(props.folder.edit)
   const [isFocus, setIsFocus] = useState(false);
   const [selectedChats, setSelectedChats] = useState(props.folder.chats);
 
-  const closeWithoutSubmit = (index) => {
+  const closeWithoutSubmit = (index: string) => {
     props.setFolders((prevState) => prevState.map((input) => input.id === index ? { ...input, edit: false } : input))
     setVisible(false)
   }
 
-  const onSubmit = (index) => {
+  const onSubmit = (index: string) => {
     props.setFolders((prevState) => prevState.map((input) =>
       input.id === index ? { ...input, title: editName ? editName : input.title, chats: selectedChats, edit: false } : input
     ))
@@ -22,7 +23,7 @@ function SidebarFolderEditModal(props) {
     closeWithoutSubmit(index)
   }
 
-  const onDelete = (index) => {
+  const onDelete = (index: string) => {
     const screensToDelete = props.screens.filter((screen) => props.folder.chats.includes(screen.id))
     if (props.screens.length === screensToDelete.length) {
       props.addChat()
@@ -31,7 +32,6 @@ function SidebarFolderEditModal(props) {
     props.setScreens((prevState) => prevState.filter((screen) => !props.folder.chats.includes(screen.id)))
     props.setNewChat('')
   }
-
 
   return (
     < Modal
