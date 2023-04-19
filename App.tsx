@@ -1,3 +1,4 @@
+import "./src/styles/styles.css";
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import ChatInterface from './src/components/ChatInterface';

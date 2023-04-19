@@ -4,8 +4,8 @@ import Ionicons from "react-native-vector-icons/Ionicons"
 import SidebarChatEditModal from "./SidebarChatEditModal"
 
 function SidebarChat(props) {
-  const editChat = (index) => {
-    props.setScreens((prevState) => prevState.map((input) => input.id === index ? { ...input, edit: true } : input))
+  const editChat = (index: any) => {
+    props.setScreens((prevState: any[]) => prevState.map((input: { id: any }) => (input.id === index ? { ...input, edit: true } : input)))
   }
 
   return (
@@ -16,9 +16,9 @@ function SidebarChat(props) {
       delayLongPress={200}
     >
       <View style={[styles.label]}>
-        <Ionicons style={styles.icon} name="chatbox-outline" size={20} color='white' />
+        <Ionicons style={styles.icon} name="chatbox-outline" size={20} color="white" />
         <Text style={styles.title}>{props.screen.title}</Text>
-        {props.screen.edit &&
+        {props.screen.edit && (
           <SidebarChatEditModal
             screen={props.screen}
             screens={props.screens}
@@ -28,7 +28,7 @@ function SidebarChat(props) {
             addChat={props.addChat}
             setNewChat={props.setNewChat}
           />
-        }
+        )}
       </View>
     </TouchableOpacity>
   )
@@ -36,28 +36,28 @@ function SidebarChat(props) {
 
 const styles = StyleSheet.create({
   label: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   icon: {
     marginRight: 10,
   },
   title: {
     flex: 1,
-    color: 'white',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
+    color: "white",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
   },
   button: {
-    backgroundColor: 'black',
+    backgroundColor: "black",
     borderRadius: 10,
     margin: 10,
-    padding: 10
+    padding: 10,
   },
   focus: {
-    backgroundImage: 'linear-gradient(to right, #4776E6 0%, #8E54E9  51%, #4776E6  100%)',
+    backgroundImage: "linear-gradient(to right, #4776E6 0%, #8E54E9  51%, #4776E6  100%)",
   },
 })
 
