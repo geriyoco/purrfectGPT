@@ -9,23 +9,27 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getBotResponse, extractBotMessage } from '../services/openai';
-import { Message } from '../types/message';
+import { selectAllMessages, addMessage } from "../redux/messageSlice"
+import { useSelector, useDispatch } from "react-redux"
+import { RootState } from '../redux/store';
 
 export interface ExtendedTextInputKeyPressEventData extends TextInputKeyPressEventData {
   shiftKey?: boolean;
 }
 
-function ChatAreaInput(props: any) {
+function ChatAreaInput({ ...props }) {
+  const { screen, flatListRef, travelEndButton } = props;
   const [currentMessage, setCurrentMessage] = useState('');
-
   const inputRef = useRef<TextInput>(null);
+  const dispatch = useDispatch();
+  const messages = useSelector((state: RootState) => selectAllMessages(state, screen.id))
 
   const handleSend = () => {
-    props.setMessageHistory([...props.messageHistory, { text: currentMessage, isBot: false }]);
+    dispatch(addMessage({ screenId: screen.id, text: currentMessage, isBot: false }))
 
-    const botResponsePromise = getBotResponse(currentMessage, props.messageHistory);
+    const botResponsePromise = getBotResponse(currentMessage, messages);
     botResponsePromise.then((botResponse) => {
-      props.setMessageHistory((prevMessages: Message[]) => [...prevMessages, extractBotMessage(botResponse)])
+      dispatch(addMessage({ screenId: screen.id, ...extractBotMessage(botResponse) }))
     });
 
     setCurrentMessage('');
@@ -42,8 +46,8 @@ function ChatAreaInput(props: any) {
   return (
     <View style={styles.bottomContainer}>
       <View style={styles.endButtonContainer}>
-        {props.travelEndButton &&
-          <TouchableOpacity style={styles.endButton} onPress={() => props.flatListRef.current?.scrollToEnd({ animated: true })}>
+        {travelEndButton &&
+          <TouchableOpacity style={styles.endButton} onPress={() => flatListRef.current?.scrollToEnd({ animated: true })}>
             <MaterialCommunityIcons name="arrow-down-circle" size={25} color="#fff" />
           </TouchableOpacity>
         }

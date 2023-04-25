@@ -1,35 +1,34 @@
 import React, { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import ChatArea from './ChatArea';
 import SidebarDrawerContent from './SidebarDrawerContent';
+import { useSelector } from 'react-redux';
+import { selectAllScreens } from '../redux/screenSlice';
 
 function Sidebar() {
   const Drawer = createDrawerNavigator();
   const { width, height } = useWindowDimensions();
   const isLargeScreen = width >= 768;
-  const [screens, setScreens] = useState([
-    { id: uuidv4(), title: 'New Chat', folderId: '', edit: false, focus: true },
-  ])
+  const screens = useSelector(selectAllScreens);
 
   return (
     <Drawer.Navigator
       useLegacyImplementation
       backBehavior="history"
       initialRouteName="Feed"
-      drawerContent={(props) => <SidebarDrawerContent screens={screens} setScreens={setScreens} {...props} />}
+      drawerContent={(props) => <SidebarDrawerContent {...props} />}
       screenOptions={{
         drawerType: isLargeScreen ? 'permanent' : 'front',
         drawerStyle: isLargeScreen ? styles.drawerStyleLargeScreen : styles.drawerStyleSmallScreen,
         drawerActiveTintColor: 'white',
       }}
     >
-      {screens.map((screen) => (
+      {screens && screens.map((screen) => (
         <Drawer.Screen
           key={screen.id}
           name={screen.id}
-          children={() => <ChatArea />}
+          children={() => <ChatArea screen={screen} />}
           options={{
             headerShown: !isLargeScreen,
             headerStyle: styles.screenHeader,

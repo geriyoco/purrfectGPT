@@ -1,54 +1,39 @@
-import React, { useState, useEffect } from "react"
-import { v4 as uuidv4 } from "uuid"
-import { StyleSheet, TouchableOpacity, View } from "react-native"
+import React, { useEffect } from "react"
+import { StyleSheet, TouchableOpacity, View, Text } from "react-native"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 import AntDesign from "react-native-vector-icons/AntDesign"
 import SidebarChat from "./SidebarChat"
 import SidebarFolder from "./SidebarFolder"
-import { SidebarProps, Folder } from "../types/sidebar"
+import { useSelector, useDispatch } from "react-redux"
+import { selectAllScreens, addScreen, toggleFocus, selectLastCreatedScreen, removeAllScreens, selectScreenById } from "../redux/screenSlice"
+import { selectAllFolders, addFolder, removeAllFolders } from "../redux/folderSlice"
+import { DrawerContentComponentProps } from "@react-navigation/drawer"
+import { removeAllMessages } from "../redux/messageSlice"
 
-function SidebarDrawerContent(props: SidebarProps) {
-  const [folders, setFolders] = useState<Array<Folder>>([])
-  const [newChat, setNewChat] = useState("")
+function SidebarDrawerContent(props: DrawerContentComponentProps) {
+  const dispatch = useDispatch()
+  const screens = useSelector(selectAllScreens);
+  const folders = useSelector(selectAllFolders);
 
-  const addFolder = () => {
-    const folderId = uuidv4()
-    setFolders((prevState) => [...prevState, { id: folderId, title: `New Folder`, chatIds: [], expand: false, edit: false }])
+  const exportChat = () => {
+    console.log("TODO export")
   }
-
-  const addChat = () => {
-    const chatId = uuidv4()
-    props.setScreens((prevState: any) => [...prevState, { id: chatId, title: `New Chat`, folderId: "", edit: false, focus: true }])
-    setNewChat(chatId)
+  const importChat = () => {
+    console.log("TODO import")
   }
-
-  useEffect(() => {
-    onTouch(newChat ? newChat : props.screens[0]["id"])
-  }, [props.screens.length, newChat])
-
-  const onTouch = (index: string) => {
-    props.setScreens((prevState =>
-      prevState.map((input) => (input.id === index ? { ...input, focus: true } : { ...input, focus: false }))
-    ))
-    props.navigation.navigate(index);
-  }
-
-  const SidebarDrawerContentProps = {
-    folders: folders,
-    setFolders: setFolders,
-    addChat: addChat,
-    newChat: newChat,
-    setNewChat: setNewChat,
-    onChatTouch: onTouch,
+  const removeAllChat = () => {
+    dispatch(removeAllMessages())
+    dispatch(removeAllFolders())
+    dispatch(removeAllScreens())
   }
 
   return (
     <View style={styles.container}>
       <View style={styles.newChat}>
-        <TouchableOpacity style={[styles.addButton, styles.addFolder]} onPress={addFolder}>
+        <TouchableOpacity style={[styles.button, styles.addFolder, { flex: 1 }]} onPress={() => dispatch(addFolder())}>
           <AntDesign name="addfolder" size={20} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.addButton, styles.addChat]} onPress={addChat}>
+        <TouchableOpacity style={[styles.button, styles.addChat, { flex: 1 }]} onPress={() => dispatch(addScreen())}>
           <MaterialCommunityIcons name="chat-plus-outline" size={20} color="white" />
         </TouchableOpacity>
       </View>
@@ -59,17 +44,15 @@ function SidebarDrawerContent(props: SidebarProps) {
             <SidebarFolder
               key={folder.id}
               folder={folder}
-              {...SidebarDrawerContentProps}
               {...props}
             />
           ))}
-        {props.screens.map((screen, _idx) => {
+        {screens.map((screen, _idx) => {
           if (!screen.folderId) {
             return (
               <SidebarChat
                 key={screen.id}
                 screen={screen}
-                {...SidebarDrawerContentProps}
                 {...props}
               />
             )
@@ -78,7 +61,20 @@ function SidebarDrawerContent(props: SidebarProps) {
         })}
       </View>
       <View style={styles.divider} />
-      <View style={styles.footer} />
+      <View style={styles.importExport}>
+        <TouchableOpacity style={[styles.button, styles.importButton, styles.footerButtons]} onPress={importChat}>
+          <MaterialCommunityIcons name="file-import-outline" size={20} color="white" />
+          <Text>Import</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, styles.exportButton, styles.footerButtons]} onPress={exportChat}>
+          <MaterialCommunityIcons name="file-export-outline" size={20} color="white" />
+          <Text>Export</Text>
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity style={[styles.button, styles.clearButton, styles.footerButtons]} onPress={removeAllChat}>
+        <MaterialCommunityIcons name="trash-can-outline" size={20} color="white" />
+        <Text>Clear Conversations</Text>
+      </TouchableOpacity>
     </View>
   )
 }
@@ -99,8 +95,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     margin: 10,
   },
-  addButton: {
-    flex: 1,
+  button: {
     backgroundColor: "gray",
     alignItems: "center",
     borderRadius: 10,
@@ -120,9 +115,25 @@ const styles = StyleSheet.create({
     backgroundColor: "grey",
     marginVertical: 5,
   },
-  footer: {
-    minHeight: 100,
+  importButton: {
+    flex: 1,
+    marginLeft: 20,
+    backgroundImage: "linear-gradient(0deg, #4776E6 0%, #8E54E9  51%)",
   },
+  exportButton: {
+    flex: 1,
+    marginRight: 20,
+    backgroundImage: "linear-gradient(0deg, #4776E6 0%, #8E54E9  51%)",
+  },
+  clearButton: {
+    marginHorizontal: 20,
+    backgroundImage: "linear-gradient(0deg, #4776E6 0%, #8E54E9  51%)",
+  },
+  importExport: {
+    justifyContent: 'space-evenly',
+    flexDirection: "row",
+  },
+  footerButtons: { flexDirection: 'row', justifyContent: 'center' }
 })
 
 export default SidebarDrawerContent

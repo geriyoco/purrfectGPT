@@ -1,50 +1,51 @@
 import { useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import { FlatList, Modal, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
 import { CreateCompletionResponseUsage } from 'openai';
 import { Message } from '../types/message';
 import { getPricing } from '../services/openai';
 
-function MessageItem(props: {message: Message}) {
+function MessageItem(props: { message: Message }) {
+  const { isBot, text, created, model, usage } = props.message;
   const [metadataVisible, setMetadataVisible] = useState(false);
   const handleLongPress = () => setMetadataVisible(true);;
   const handleCloseMetadata = () => setMetadataVisible(false);
 
-  const ProfileIcon = (
-    <MaterialCommunityIcons
-      name={props.message.isBot ? "robot-outline" : "face-man"}
-      style={styles.profileIcon}
-      size={20}
-      color="#fff"
-    />
-  );
-
-  const MessageContent = (
-    <Text style={styles.textMessage}>{props.message.text}</Text>
-  );
+  const copyToClipboard = () => {
+    Clipboard.setString(text)
+  }
 
   return (
     <>
-      {props.message.isBot ? (
-        <TouchableOpacity onLongPress={handleLongPress} style={[styles.messageItem, styles.botMessage]}>
-          {ProfileIcon}
-          {MessageContent}
+      <TouchableOpacity
+        activeOpacity={isBot ? 0.2 : 1}
+        onLongPress={isBot ? handleLongPress : undefined}
+        style={[styles.messageItem, isBot ? styles.botMessage : styles.userMessage]}>
+        <MaterialCommunityIcons
+          name={isBot ? "robot-outline" : "face-man"}
+          style={styles.profileIcon}
+          size={20}
+          color="#fff"
+        />
+        <Text style={styles.textMessage}>{text}</Text>
+        <TouchableOpacity onPress={copyToClipboard}>
+          <MaterialCommunityIcons
+            name='content-copy'
+            style={styles.profileIcon}
+            size={20}
+            color="#fff"
+          />
         </TouchableOpacity>
-      ) : (
-        <View style={[styles.messageItem, styles.userMessage]}>
-          {ProfileIcon}
-          {MessageContent}
-        </View>
-      )}
+      </TouchableOpacity>
 
       <MetadataPopup
         visible={metadataVisible}
         onClose={handleCloseMetadata}
-        created={props.message.created}
-        model={props.message.model}
-        usage={props.message.usage}
+        created={created}
+        model={model}
+        usage={usage}
       />
     </>
   );
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(52,53,65)',
   },
   textMessage: {
-    flexShrink: 1,
+    flex: 1,
     color: 'white'
   },
   modalOverlay: {

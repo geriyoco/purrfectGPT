@@ -1,17 +1,31 @@
 import { AxiosResponse } from 'axios';
 import { Configuration, OpenAIApi } from 'openai';
 import {
-  ChatCompletionRequestMessageRoleEnum, CreateChatCompletionResponse,
+  ChatCompletionRequestMessageRoleEnum,
+  CreateChatCompletionResponse,
 } from 'openai';
 import { Message } from '../types/message'
 
 type BotResponse = AxiosResponse<CreateChatCompletionResponse, any> | null;
 
-const configuration = new Configuration({
-    organization: process.env.ORG_ID,
-    apiKey: process.env.API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+let openai: OpenAIApi;
+
+export const initializeOpenAIAPI = (apiKey: string) => {
+  const configuration = new Configuration({
+    apiKey: apiKey,
+  });
+  openai = new OpenAIApi(configuration);
+}
+
+export const listModels = async () => {
+  try {
+    const botResponseListModels = await openai.listModels();
+    return true
+  } catch (error) {
+    console.log('error detected: ', error);
+    return false
+  }
+}
 
 /**
  * Get a response from OpenAI GPT model given the user message and chat history.
@@ -24,9 +38,9 @@ export const getBotResponse = async (message: string, messageHistory: Message[])
   const botResponsePromise = openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [
-      {"role": "system", "content": "Be helpful"},
+      { "role": "system", "content": "Be helpful" },
       ...messageHistory.map(formatMessageForAPI),
-      {"role": "user", "content": message},
+      { "role": "user", "content": message },
     ],
   });
 
@@ -66,7 +80,7 @@ export const getPricing = (model: string, tokens: number): number => {
   return 0.0;
 };
 
-const formatMessageForAPI = (message: Message): {role: ChatCompletionRequestMessageRoleEnum, content: string} => {
+const formatMessageForAPI = (message: Message): { role: ChatCompletionRequestMessageRoleEnum, content: string } => {
   return {
     role: message.isBot ? "assistant" : "user",
     content: message.text,
@@ -85,11 +99,12 @@ const mockResponse: BotResponse = {
       total_tokens: 3,
     },
     choices: [{
-        "message": {
-          "role": "assistant",
-          "content": "This is a mock response from the bot."},
-        "finish_reason": "stop",
-        "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "This is a mock response from the bot."
+      },
+      "finish_reason": "stop",
+      "index": 0,
     }],
   },
   status: 200,
