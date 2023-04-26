@@ -3,16 +3,16 @@
 
 name: Deploy to Firebase Hosting on PR
 "on": pull_request
-env:
-  ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
-  APP_BUILD: development
 jobs:
   build_and_preview:
     if: "${{ github.event.pull_request.head.repo.full_name == github.repository }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: npm i && npm run predeploy
+      - run: |
+          echo ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }} >> .env
+          echo APP_BUILD=development >> .env
+          npm i && npm run predeploy
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
