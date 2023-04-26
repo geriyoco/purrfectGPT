@@ -1,26 +1,31 @@
-import React, { useEffect } from "react"
-import { TouchableOpacity, View, Text, StyleSheet } from "react-native"
-import Ionicons from "react-native-vector-icons/Ionicons"
-import SidebarChatEditModal from "./SidebarChatEditModal"
-import { useDispatch, useSelector } from "react-redux"
-import { selectAllScreens, selectLastCreatedScreen, toggleEdit, toggleFocus } from "../redux/screenSlice"
+import React, { useEffect } from "react";
+import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import SidebarChatEditModal from "./SidebarChatEditModal";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectAllScreens,
+  selectLastCreatedScreen,
+  toggleEdit,
+  toggleFocus,
+} from "../redux/screenSlice";
 
 function SidebarChat({ ...props }) {
-  const { navigation, screen, ...rest } = props
-  const dispatch = useDispatch()
-  const screens = useSelector(selectAllScreens)
-  const lastAddedScreenId = useSelector(selectLastCreatedScreen)
+  const { navigation, screen } = props;
+  const dispatch = useDispatch();
+  const screens = useSelector(selectAllScreens);
+  const lastAddedScreenId = useSelector(selectLastCreatedScreen);
 
   useEffect(() => {
-    onTouch(lastAddedScreenId ? lastAddedScreenId : screens[0]["id"])
-  }, [lastAddedScreenId])
+    onTouch(lastAddedScreenId ? lastAddedScreenId : screens[0]["id"]);
+  }, [lastAddedScreenId]);
 
   const onTouch = (screenId: string | undefined) => {
     if (screenId) {
-      dispatch(toggleFocus(screenId))
+      dispatch(toggleFocus(screenId));
       navigation.navigate(screenId);
     }
-  }
+  };
 
   return (
     <TouchableOpacity
@@ -30,7 +35,12 @@ function SidebarChat({ ...props }) {
       delayLongPress={200}
     >
       <View style={[styles.label]}>
-        <Ionicons style={styles.icon} name="chatbox-outline" size={20} color="white" />
+        <Ionicons
+          style={styles.icon}
+          name="chatbox-outline"
+          size={20}
+          color="white"
+        />
         <Text
           selectable={false}
           style={styles.title}
@@ -39,12 +49,10 @@ function SidebarChat({ ...props }) {
         >
           {screen.title}
         </Text>
-        {screen.edit && (
-          <SidebarChatEditModal {...props} />
-        )}
+        {screen.edit && <SidebarChatEditModal {...props} />}
       </View>
     </TouchableOpacity>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -58,7 +66,7 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    alignSelf: 'center',
+    alignSelf: "center",
     color: "white",
     overflow: "hidden",
   },
@@ -69,8 +77,9 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   focus: {
-    backgroundImage: "linear-gradient(to right, #4776E6 0%, #8E54E9  51%, #4776E6  100%)",
+    backgroundImage:
+      "linear-gradient(to right, #4776E6 0%, #8E54E9  51%, #4776E6  100%)",
   },
-})
+});
 
-export default SidebarChat
+export default SidebarChat;

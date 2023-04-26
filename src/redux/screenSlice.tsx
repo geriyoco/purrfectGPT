@@ -1,17 +1,17 @@
-import { createSlice } from "@reduxjs/toolkit"
-import { RootState } from "./store"
-import { v4 as uuidv4 } from "uuid"
+import { createSlice } from "@reduxjs/toolkit";
+import { RootState } from "./store";
+import { v4 as uuidv4 } from "uuid";
 
-interface Screen {
-  id: string
-  title: string
-  folderId: string
-  edit: boolean
-  focus: boolean
-  messages: string[]
+export interface Screen {
+  id: string;
+  title: string;
+  folderId: string;
+  edit: boolean;
+  focus: boolean;
+  messages: string[];
 }
 
-const initialId = uuidv4()
+const initialId = uuidv4();
 const initialState = {
   lastAddedScreenId: initialId,
   entities: [
@@ -24,7 +24,7 @@ const initialState = {
       messages: [],
     },
   ],
-}
+};
 
 const screenSlice = createSlice({
   name: "screens",
@@ -32,81 +32,124 @@ const screenSlice = createSlice({
   reducers: {
     addScreen: (state) => {
       // const chatId = action.payload
-      const chatId = uuidv4()
-      state.entities.push({ id: chatId, title: `New Chat`, folderId: "", edit: false, focus: true, messages: [] })
-      state.lastAddedScreenId = chatId
+      const chatId = uuidv4();
+      state.entities.push({
+        id: chatId,
+        title: `New Chat`,
+        folderId: "",
+        edit: false,
+        focus: true,
+        messages: [],
+      });
+      state.lastAddedScreenId = chatId;
     },
     updateScreen: (state, action) => {
-      const { id, title, folderId } = action.payload
+      const { id, title, folderId } = action.payload;
       return {
         ...state,
         entities: state.entities.map((screen) =>
-          screen.id === id ? { ...screen, title: title ? title : screen.title, folderId: folderId, edit: false } : screen
+          screen.id === id
+            ? {
+                ...screen,
+                title: title ? title : screen.title,
+                folderId: folderId,
+                edit: false,
+              }
+            : screen
         ),
-      }
+      };
     },
     removeScreen: (state, action) => {
       return {
         ...state,
-        entities: state.entities.filter((screen) => screen.id !== action.payload),
+        entities: state.entities.filter(
+          (screen) => screen.id !== action.payload
+        ),
         lastAddedScreenId: "",
-      }
+      };
     },
     toggleEdit: (state, action) => {
       return {
         ...state,
-        entities: state.entities.map((screen) => (screen.id === action.payload ? { ...screen, edit: !screen.edit } : { ...screen, edit: false })),
-      }
+        entities: state.entities.map((screen) =>
+          screen.id === action.payload
+            ? { ...screen, edit: !screen.edit }
+            : { ...screen, edit: false }
+        ),
+      };
     },
     toggleFocus: (state, action) => {
       return {
         ...state,
-        entities: state.entities.map((screen) => (screen.id === action.payload ? { ...screen, focus: true } : { ...screen, focus: false })),
-      }
+        entities: state.entities.map((screen) =>
+          screen.id === action.payload
+            ? { ...screen, focus: true }
+            : { ...screen, focus: false }
+        ),
+      };
     },
     updateScreenFolders: (state, action) => {
-      const { id, chatIds } = action.payload
+      const { id, chatIds } = action.payload;
       return {
         ...state,
         entities: state.entities.map((screen) =>
-          chatIds.includes(screen.id) ? { ...screen, folderId: id, edit: false } : { ...screen, folderId: "", edit: false }
+          chatIds.includes(screen.id)
+            ? { ...screen, folderId: id, edit: false }
+            : { ...screen, folderId: "", edit: false }
         ),
-      }
+      };
     },
     removeFolderFromScreens: (state, action) => {
       return {
         ...state,
-        entities: state.entities.filter((screen) => screen.folderId !== action.payload),
-      }
+        entities: state.entities.filter(
+          (screen) => screen.folderId !== action.payload
+        ),
+      };
     },
     updateScreenMessages: (state, action) => {
-      const { screenId, messageIds } = action.payload
+      const { screenId, messageIds } = action.payload;
       return {
         ...state,
-        entities: state.entities.map((screen) => (screen.id === screenId ? { ...screen, messages: messageIds } : { ...screen })),
-      }
+        entities: state.entities.map((screen) =>
+          screen.id === screenId
+            ? { ...screen, messages: messageIds }
+            : { ...screen }
+        ),
+      };
     },
     removeAllScreens: (state) => {
-      const chatId = uuidv4()
+      const chatId = uuidv4();
       return {
         ...state,
-        entities: [{ id: chatId, title: `New Chat`, folderId: "", edit: false, focus: true, messages: [] }],
-        lastAddedScreenId: chatId
-      }
+        entities: [
+          {
+            id: chatId,
+            title: `New Chat`,
+            folderId: "",
+            edit: false,
+            focus: true,
+            messages: [],
+          },
+        ],
+        lastAddedScreenId: chatId,
+      };
     },
     addScreens: (state, action) => {
-      const screens = action.payload
+      const screens = action.payload;
       return {
         ...state,
-        ...screens
-      }
-    }
+        ...screens,
+      };
+    },
   },
-})
+});
 
-export const selectAllScreens = (state: RootState) => state.screens.entities
-export const selectScreenById = (state: RootState, screenId: string) => state.screens.entities.find((screen) => screen.id === screenId)
-export const selectLastCreatedScreen = (state: RootState) => state.screens.lastAddedScreenId
+export const selectAllScreens = (state: RootState) => state.screens.entities;
+export const selectScreenById = (state: RootState, screenId: string) =>
+  state.screens.entities.find((screen) => screen.id === screenId);
+export const selectLastCreatedScreen = (state: RootState) =>
+  state.screens.lastAddedScreenId;
 
 // Export the slice's reducer and actions
 export const {
@@ -119,6 +162,6 @@ export const {
   removeFolderFromScreens,
   updateScreenMessages,
   removeAllScreens,
-  addScreens
-} = screenSlice.actions
-export default screenSlice.reducer
+  addScreens,
+} = screenSlice.actions;
+export default screenSlice.reducer;

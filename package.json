@@ -7,7 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx",
+    "pretty": "prettier --write \"./src/**/*.{js,jsx,ts,tsx,json}\"",
     "predeploy": "expo export:web",
     "deploy-hosting": "npm run predeploy && firebase deploy --only hosting",
     "deploy-preview": "npm run predeploy && firebase hosting:channel:deploy testing-purrfectgpt"
@@ -54,6 +55,8 @@
     "@typescript-eslint/eslint-plugin": "^5.58.0",
     "@typescript-eslint/parser": "^5.58.0",
     "eslint": "^8.38.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.8",
     "typescript": "^4.9.4"
   },
   "private": true

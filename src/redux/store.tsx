@@ -1,11 +1,11 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit"
-import { persistStore, persistReducer } from 'redux-persist';
-import { encryptTransform } from 'redux-persist-transform-encrypt';
-import screensReducer from "./screenSlice"
-import foldersReducer from "./folderSlice"
-import messagesReducer from "./messageSlice"
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import authReducer from "./authSlice"
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import { encryptTransform } from "redux-persist-transform-encrypt";
+import screensReducer from "./screenSlice";
+import foldersReducer from "./folderSlice";
+import messagesReducer from "./messageSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import authReducer from "./authSlice";
 
 const encryptionKey = process.env.ENCRYPTION_KEY;
 
@@ -23,23 +23,23 @@ const rootReducer = combineReducers({
   folders: foldersReducer,
   messages: messagesReducer,
   auth: authReducer,
-})
+});
 
 const persistConfig = {
-  key: 'root',
+  key: "root",
   storage: AsyncStorage,
   transforms: [
     encryptTransform({
       secretKey: encryptionKey as string,
-    })
+    }),
   ],
-}
+};
 
-const persistedReducer = persistReducer(persistConfig, rootReducer)
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 export const store = configureStore({
   reducer: persistedReducer,
-})
+});
 
-export const persistor = persistStore(store)
-export type { RootState }
+export const persistor = persistStore(store);
+export type { RootState };
 // export type RootState = ReturnType<typeof store.getState>

@@ -1,45 +1,56 @@
-import React, { useState } from "react"
-import { Text, View, StyleSheet, TextInputKeyPressEventData, NativeSyntheticEvent } from "react-native"
-import { TextInput, TouchableOpacity } from "react-native-gesture-handler"
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
-import { initializeOpenAIAPI, listModels } from '../services/openai';
+import React, { useState } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TextInputKeyPressEventData,
+  NativeSyntheticEvent,
+  Keyboard,
+} from "react-native";
+import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import { initializeOpenAIAPI, listModels } from "../services/openai";
 import { useDispatch, useSelector } from "react-redux";
-import { setAuth, selectAuth } from '../redux/authSlice'
+import { setAuth, selectAuth } from "../redux/authSlice";
 
-// close keyboard when chat enter, using blur() on red of textinput method
-
-function ChatHomepage({ ...props }) {
-  const [apiKey, setApiKey] = useState("")
-  const [error, setError] = useState(false)
-  const dispatch = useDispatch()
-  const auth = useSelector(selectAuth)
+function ChatHomepage() {
+  const [apiKey, setApiKey] = useState("");
+  const [error, setError] = useState(false);
+  const dispatch = useDispatch();
+  const auth = useSelector(selectAuth);
 
   const onSubmit = async () => {
-    initializeOpenAIAPI(apiKey)
-    const result = await listModels()
+    initializeOpenAIAPI(apiKey);
+    const result = await listModels();
     if (result) {
-      dispatch(setAuth({ apiKey: apiKey, isAuthorized: true }))
-      setError(false)
+      dispatch(setAuth({ apiKey: apiKey, isAuthorized: true }));
+      setError(false);
     } else {
-      dispatch(setAuth({ apiKey: apiKey, isAuthorized: false }))
-      setError(true)
+      dispatch(setAuth({ apiKey: apiKey, isAuthorized: false }));
+      setError(true);
     }
-  }
+  };
 
-  const handleKeyDown = (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+  const handleKeyDown = (
+    e: NativeSyntheticEvent<TextInputKeyPressEventData>
+  ) => {
     if (e.nativeEvent.key === "Enter") {
-      e.preventDefault()
-      onSubmit()
+      e.preventDefault();
+      Keyboard.dismiss();
+      onSubmit();
     }
-  }
+  };
 
   return (
     <View style={styles.chatArea}>
       <Text style={styles.header}> Welcome to the purrfectGPT! </Text>
       <FontAwesome5 style={styles.icon} name="cat" size={100} color="#fff" />
-      {!auth.isAuthorized &&
+      {!auth.isAuthorized && (
         <View style={styles.inputSection}>
-          <Text style={styles.caption}> Start by inputting your OpenAI API key! </Text>
+          <Text style={styles.caption}>
+            {" "}
+            Start by inputting your OpenAI API key!{" "}
+          </Text>
           <View style={styles.labelAndTextInput}>
             <Text style={styles.inputLabel}>API Key :</Text>
             <TextInput
@@ -60,13 +71,17 @@ function ChatHomepage({ ...props }) {
             <Text style={styles.caption}> Submit </Text>
           </TouchableOpacity>
         </View>
-      }
-      <Text style={styles.caption}> Please note that your chat conversations will not be saved, but you can choose to export the data </Text>
-      {auth.isAuthorized &&
+      )}
+      <Text style={styles.caption}>
+        {" "}
+        Please note that your chat conversations will not be saved, but you can
+        choose to export the data{" "}
+      </Text>
+      {auth.isAuthorized && (
         <Text style={styles.caption}> You can now start typing below! </Text>
-      }
+      )}
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -110,7 +125,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20
+    padding: 20,
   },
   labelAndTextInput: {
     flexDirection: "row",
@@ -124,7 +139,7 @@ const styles = StyleSheet.create({
   submitButton: {
     backgroundColor: "rgb(64,65,79)",
     padding: 10,
-  }
-})
+  },
+});
 
-export default ChatHomepage
+export default ChatHomepage;

@@ -1,54 +1,81 @@
-import React, { useState } from "react"
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback } from "react-native"
-import { MultiSelect } from "react-native-element-dropdown"
-import AntDesign from "react-native-vector-icons/AntDesign"
-import { useDispatch, useSelector } from "react-redux"
+import React, { useState } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { MultiSelect } from "react-native-element-dropdown";
+import AntDesign from "react-native-vector-icons/AntDesign";
+import { useDispatch, useSelector } from "react-redux";
 import {
   addScreen,
   selectAllScreens,
   updateScreenFolders,
   removeFolderFromScreens,
-} from "../redux/screenSlice"
-import { removeFolder, toggleEdit as toggleEditFolder, updateFolder } from "../redux/folderSlice"
+} from "../redux/screenSlice";
+import {
+  removeFolder,
+  toggleEdit as toggleEditFolder,
+  updateFolder,
+} from "../redux/folderSlice";
 
 function SidebarFolderEditModal({ ...props }) {
-  const { folder } = props
-  const [editName, setEditName] = useState(folder.title)
-  const [isFocus, setIsFocus] = useState(false)
-  const [selectedChats, setSelectedChats] = useState(folder.chatIds)
-  const dispatch = useDispatch()
-  const screens = useSelector(selectAllScreens)
+  const { folder } = props;
+  const [editName, setEditName] = useState(folder.title);
+  const [isFocus, setIsFocus] = useState(false);
+  const [selectedChats, setSelectedChats] = useState(folder.chatIds);
+  const dispatch = useDispatch();
+  const screens = useSelector(selectAllScreens);
 
   const closeWithoutSubmit = (index: string) => {
-    dispatch(toggleEditFolder(index))
-  }
+    dispatch(toggleEditFolder(index));
+  };
 
   const onSubmit = (index: string) => {
-    dispatch(updateFolder({ id: index, title: editName, chatIds: selectedChats }))
-    dispatch(updateScreenFolders({ id: index, chatIds: selectedChats }))
-  }
+    dispatch(
+      updateFolder({ id: index, title: editName, chatIds: selectedChats })
+    );
+    dispatch(updateScreenFolders({ id: index, chatIds: selectedChats }));
+  };
 
   const onDelete = (index: string) => {
-    const screensToDelete = screens.filter((screen) => folder.chatIds.includes(screen.id))
+    const screensToDelete = screens.filter((screen) =>
+      folder.chatIds.includes(screen.id)
+    );
     if (screens.length === screensToDelete.length) {
-      dispatch(addScreen())
+      dispatch(addScreen());
     }
-    dispatch(removeFolder(index))
-    dispatch(removeFolderFromScreens(index))
-  }
+    dispatch(removeFolder(index));
+    dispatch(removeFolderFromScreens(index));
+  };
 
   return (
-    <Modal animationType="fade" transparent={true} visible={folder.edit} onRequestClose={() => closeWithoutSubmit(folder.id)}>
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={folder.edit}
+      onRequestClose={() => closeWithoutSubmit(folder.id)}
+    >
       <TouchableWithoutFeedback onPress={() => closeWithoutSubmit(folder.id)}>
         <View style={styles.editModal}>
           <TouchableWithoutFeedback>
             <View style={styles.editModalContainer}>
-              <Text selectable={false} style={styles.editTitle}>Edit Folder</Text>
+              <Text selectable={false} style={styles.editTitle}>
+                Edit Folder
+              </Text>
               <View style={styles.editSection}>
-                <Text selectable={false} style={styles.editHeader}>Name</Text>
+                <Text selectable={false} style={styles.editHeader}>
+                  Name
+                </Text>
                 <TextInput
                   style={
-                    editName === folder.title || !editName ? [styles.textInput, { color: "gray" }] : [styles.textInput, { color: "white" }]
+                    editName === folder.title || !editName
+                      ? [styles.textInput, { color: "gray" }]
+                      : [styles.textInput, { color: "white" }]
                   }
                   autoFocus
                   placeholder={folder.title}
@@ -57,7 +84,9 @@ function SidebarFolderEditModal({ ...props }) {
                 />
               </View>
               <View style={styles.editSection}>
-                <Text selectable={false} style={styles.editHeader}>Add Chats</Text>
+                <Text selectable={false} style={styles.editHeader}>
+                  Add Chats
+                </Text>
                 <MultiSelect
                   data={screens}
                   search
@@ -77,25 +106,49 @@ function SidebarFolderEditModal({ ...props }) {
                   onFocus={() => setIsFocus(true)}
                   onBlur={() => setIsFocus(false)}
                   onChange={(item) => {
-                    setSelectedChats(item)
+                    setSelectedChats(item);
                   }}
                   renderSelectedItem={(item, unSelect) => (
-                    <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                    <TouchableOpacity
+                      onPress={() => unSelect && unSelect(item)}
+                    >
                       <View style={styles.selectedStyle}>
-                        <Text selectable={false} style={styles.textSelectedStyle}>{item.title}</Text>
+                        <Text
+                          selectable={false}
+                          style={styles.textSelectedStyle}
+                        >
+                          {item.title}
+                        </Text>
                         <AntDesign color="black" name="delete" size={17} />
                       </View>
                     </TouchableOpacity>
                   )}
-                  renderLeftIcon={() => <AntDesign style={styles.folderIcon} color={"white"} name="folderopen" size={20} />}
+                  renderLeftIcon={() => (
+                    <AntDesign
+                      style={styles.folderIcon}
+                      color={"white"}
+                      name="folderopen"
+                      size={20}
+                    />
+                  )}
                 />
               </View>
               <View style={styles.editFooter}>
-                <TouchableOpacity style={styles.deleteButton} onPress={() => onDelete(folder.id)}>
-                  <Text selectable={false} style={styles.delete}>Delete Folder</Text>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => onDelete(folder.id)}
+                >
+                  <Text selectable={false} style={styles.delete}>
+                    Delete Folder
+                  </Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.submitButton} onPress={() => onSubmit(folder.id)}>
-                  <Text selectable={false} style={styles.submit}>Save</Text>
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={() => onSubmit(folder.id)}
+                >
+                  <Text selectable={false} style={styles.submit}>
+                    Save
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -103,7 +156,7 @@ function SidebarFolderEditModal({ ...props }) {
         </View>
       </TouchableWithoutFeedback>
     </Modal>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -213,6 +266,6 @@ const styles = StyleSheet.create({
     marginRight: 5,
     fontSize: 16,
   },
-})
+});
 
-export default SidebarFolderEditModal
+export default SidebarFolderEditModal;
