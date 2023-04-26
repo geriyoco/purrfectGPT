@@ -29,6 +29,7 @@ function MessageItem({ ...props }) {
   const [edit, setEdit] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
   const [editText, setEditText] = useState(text);
+  const [height, setHeight] = useState(0);
   const dispatch = useDispatch();
 
   const copyToClipboard = () => {
@@ -55,6 +56,10 @@ function MessageItem({ ...props }) {
     setDeleteMode(false);
   };
 
+  const updateSize = (height: number) => {
+    setHeight(height);
+  }
+
   return (
     <>
       <TouchableOpacity
@@ -73,8 +78,10 @@ function MessageItem({ ...props }) {
         />
         {edit ? (
           <TextInput
-            style={[styles.textMessage, { marginRight: 10 }]}
+            style={[styles.textMessage, { height: height }]}
             autoFocus
+            multiline
+            onContentSizeChange={(e) => updateSize(e.nativeEvent.contentSize.height)}
             placeholder={text}
             value={editText}
             onChangeText={setEditText}
@@ -211,6 +218,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgb(52,53,65)",
   },
   textMessage: {
+    marginRight: 10,
     flex: 1,
     color: "white",
   },
