@@ -10,8 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: |
-          echo ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }} >> .env
-          echo APP_BUILD=development >> .env
+          echo ENCRYPTION_KEY="${{ secrets.ENCRYPTION_KEY }}" >> .env
+          echo APP_BUILD="development" >> .env
           npm i && npm run predeploy
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
