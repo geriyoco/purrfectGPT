@@ -2,6 +2,9 @@
 # https://github.com/firebase/firebase-tools
 
 name: Deploy to Firebase Hosting on merge
+env:
+  ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+  APP_BUILD: production
 "on":
   push:
     branches:
@@ -13,9 +16,6 @@ jobs:
       - uses: actions/checkout@v3
       - run: npm i && npm run predeploy
       - uses: FirebaseExtended/action-hosting-deploy@v0
-        env:
-          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
-          APP_BUILD: production
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_PURRFECTGPT }}"
