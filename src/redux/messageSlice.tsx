@@ -39,6 +39,13 @@ const messageSlice = createSlice({
         ...state,
         entities: []
       }
+    },
+    addMessages: (state, action) => {
+      const messages = action.payload
+      return {
+        ...state,
+        ...messages
+      }
     }
     // updateMessage: (state, action) => {
     //   const { id, title, folderId } = action.payload
@@ -62,7 +69,8 @@ export const selectAllMessages = (state: RootState, screenId: string) => state.m
 // Export the slice's reducer and actions
 export const {
   addMessage,
-  removeAllMessages
+  removeAllMessages,
+  addMessages
   // updateMessage, 
   // removeMessage 
 } = messageSlice.actions;

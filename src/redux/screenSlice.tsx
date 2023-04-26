@@ -87,9 +87,18 @@ const screenSlice = createSlice({
       }
     },
     removeAllScreens: (state) => {
+      const chatId = uuidv4()
       return {
         ...state,
-        entities: initialState.entities
+        entities: [{ id: chatId, title: `New Chat`, folderId: "", edit: false, focus: true, messages: [] }],
+        lastAddedScreenId: chatId
+      }
+    },
+    addScreens: (state, action) => {
+      const screens = action.payload
+      return {
+        ...state,
+        ...screens
       }
     }
   },
@@ -110,5 +119,6 @@ export const {
   removeFolderFromScreens,
   updateScreenMessages,
   removeAllScreens,
+  addScreens
 } = screenSlice.actions
 export default screenSlice.reducer

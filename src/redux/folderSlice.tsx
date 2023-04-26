@@ -69,6 +69,13 @@ const folderSlice = createSlice({
         ...state,
         entities: []
       }
+    },
+    addFolders: (state, action) => {
+      const folders = action.payload
+      return {
+        ...state,
+        ...folders
+      }
     }
   },
 });
@@ -84,6 +91,7 @@ export const {
   toggleExpand,
   updateScreensInFolders,
   removeScreensInFolder,
-  removeAllFolders
+  removeAllFolders,
+  addFolders
 } = folderSlice.actions;
 export default folderSlice.reducer;

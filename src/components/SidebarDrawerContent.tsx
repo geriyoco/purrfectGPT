@@ -1,25 +1,59 @@
-import React, { useEffect } from "react"
+import React, { CSSProperties, useRef } from "react"
 import { StyleSheet, TouchableOpacity, View, Text } from "react-native"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 import AntDesign from "react-native-vector-icons/AntDesign"
+import { useSelector, useDispatch } from "react-redux"
+import { DrawerContentComponentProps } from "@react-navigation/drawer"
+import { selectAllScreens, addScreen, removeAllScreens, addScreens } from "../redux/screenSlice"
+import { selectAllFolders, addFolder, removeAllFolders, addFolders } from "../redux/folderSlice"
+import { addMessages, removeAllMessages } from "../redux/messageSlice"
+import { saveAs } from 'file-saver';
+import { store } from "../redux/store"
 import SidebarChat from "./SidebarChat"
 import SidebarFolder from "./SidebarFolder"
-import { useSelector, useDispatch } from "react-redux"
-import { selectAllScreens, addScreen, toggleFocus, selectLastCreatedScreen, removeAllScreens, selectScreenById } from "../redux/screenSlice"
-import { selectAllFolders, addFolder, removeAllFolders } from "../redux/folderSlice"
-import { DrawerContentComponentProps } from "@react-navigation/drawer"
-import { removeAllMessages } from "../redux/messageSlice"
+
 
 function SidebarDrawerContent(props: DrawerContentComponentProps) {
   const dispatch = useDispatch()
+  const fileInputRef: React.Ref<HTMLInputElement> = useRef(null)
   const screens = useSelector(selectAllScreens);
   const folders = useSelector(selectAllFolders);
 
+  const handleFileChange = (event: any) => {
+    const selectedFile = event.target.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(selectedFile);
+    reader.onload = () => {
+      const fileData = reader.result as string
+      if (fileData) {
+        (async function () {
+          const response = await fetch(fileData);
+          const data = await response.json();
+          dispatch(addMessages(data.messages))
+          dispatch(addFolders(data.folders))
+          dispatch(addScreens(data.screens))
+        })();
+      }
+    };
+  };
+
+  const downloadState = (state: any) => {
+    const jsonState = JSON.stringify(state);
+    const file = new Blob([jsonState], { type: 'application/json' });
+    const now = new Date().toISOString();
+    saveAs(file, `${now}-purrfectChats.json`);
+  };
+
   const exportChat = () => {
-    console.log("TODO export")
+    const state = store.getState()
+    delete state.auth
+    delete state._persist
+    downloadState(state)
   }
   const importChat = () => {
-    console.log("TODO import")
+    if (fileInputRef && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   }
   const removeAllChat = () => {
     dispatch(removeAllMessages())
@@ -65,6 +99,7 @@ function SidebarDrawerContent(props: DrawerContentComponentProps) {
         <TouchableOpacity style={[styles.button, styles.importButton, styles.footerButtons]} onPress={importChat}>
           <MaterialCommunityIcons name="file-import-outline" size={20} color="white" />
           <Text>Import</Text>
+          <input ref={fileInputRef} id="files" type="file" onChange={handleFileChange} style={styles.fileUpload as CSSProperties} />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.exportButton, styles.footerButtons]} onPress={exportChat}>
           <MaterialCommunityIcons name="file-export-outline" size={20} color="white" />
@@ -133,7 +168,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     flexDirection: "row",
   },
-  footerButtons: { flexDirection: 'row', justifyContent: 'center' }
+  footerButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center'
+  },
+  fileUpload: {
+    display: 'none'
+  }
 })
 
 export default SidebarDrawerContent
