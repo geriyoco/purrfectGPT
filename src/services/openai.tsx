@@ -48,7 +48,7 @@ export const getBotResponse = async (
   });
 
   try {
-    if (process.env.DEBUG === "true") {
+    if (process.env.APP_BUILD === "development") {
       return mockResponse;
     }
     return await botResponsePromise;

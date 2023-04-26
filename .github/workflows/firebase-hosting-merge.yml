@@ -15,6 +15,7 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         env:
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          APP_BUILD: production
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_PURRFECTGPT }}"
