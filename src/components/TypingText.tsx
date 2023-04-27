@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Text } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { Text } from "react-native";
 
 const TypingText = ({ text, speed, ...props }) => {
-  const [typedText, setTypedText] = useState('');
+  const [typedText, setTypedText] = useState("");
 
   useEffect(() => {
     let currentIndex = 0;
     const timer = setInterval(() => {
       if (currentIndex < text.length) {
-        setTypedText(typedText => typedText + text[currentIndex]);
+        setTypedText((typedText) => typedText + text[currentIndex]);
         currentIndex++;
       } else {
         clearInterval(timer);
@@ -17,9 +17,7 @@ const TypingText = ({ text, speed, ...props }) => {
     return () => clearInterval(timer);
   }, [text, speed]);
 
-  return (
-    <Text {...props}>{typedText}</Text>
-  );
+  return <Text {...props}>{typedText}</Text>;
 };
 
 export default TypingText;

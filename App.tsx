@@ -2,12 +2,20 @@ import "./src/styles/styles.css";
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import ChatInterface from './src/components/ChatInterface';
+import { Provider } from 'react-redux';
+import { store, persistor } from './src/redux/store';
+import { PersistGate } from 'redux-persist/integration/react'
+
 
 function App() {
   return (
-    <View style={styles.root}>
-      <ChatInterface />
-    </View>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <View style={styles.root}>
+          <ChatInterface />
+        </View>
+      </PersistGate>
+    </Provider>
   );
 }
 

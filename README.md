@@ -16,16 +16,10 @@ Then navigate to the project directory:
 cd purrfectGPT
 ```
 
-Install the necessary dependencies using NPM:
+Install the necessary dependencies using NPM and start the Expo development server by running:
 
 ```
-npm install
-```
-
-After the installation completes, you can start the Expo development server by running:
-
-```
-npm start
+npm i && npm start
 ```
 
 You can then launch the app in your preferred environment, whether it be an iOS simulator or Android emulator, or on your physical device using the Expo app.
