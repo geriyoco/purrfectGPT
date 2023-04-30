@@ -1,50 +1,41 @@
-import React, { useRef, useState, useEffect } from "react";
-import { StyleSheet, FlatList, View } from "react-native";
-import MessageItem from "./MessageItem";
-import ChatAreaInput from "./ChatAreaInput";
-import ChatHomepage from "./ChatHomepage";
-import { selectAuth } from "../redux/authSlice";
-import { selectAllMessages } from "../redux/messageSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { initializeOpenAIAPI } from "../services/openai";
-import { RootState } from "../redux/store";
-import { updateScreenMessages } from "../redux/screenSlice";
+import React, { useRef, useState, useEffect } from "react"
+import { StyleSheet, FlatList, View, NativeSyntheticEvent, NativeScrollEvent } from "react-native"
+import MessageItem from "./MessageItem"
+import ChatAreaInput from "./ChatAreaInput"
+import ChatHomepage from "./ChatHomepage"
+import { selectAuth } from "../redux/authSlice"
+import { selectMessagesByScreenId } from "../redux/messageSlice"
+import { useSelector } from "react-redux"
+import { initializeOpenAIAPI } from "../services/openai"
+import { RootState } from "../redux/store"
+import isEqual from "lodash/isEqual"
 
 function ChatArea({ ...props }) {
-  const { screen } = props;
-  const flatListRef = useRef<FlatList>(null);
-  const [travelEndButton, setTravelEndButton] = useState(false);
-  const auth = useSelector(selectAuth);
-  const dispatch = useDispatch();
-  const messages = useSelector((state: RootState) =>
-    selectAllMessages(state, screen.id)
-  );
+  const { screen } = props
+  const flatListRef = useRef<FlatList>(null)
+  const [travelEndButton, setTravelEndButton] = useState(false)
+  const auth = useSelector(selectAuth)
+  const messages = useSelector((state: RootState) => selectMessagesByScreenId(state, screen.id), isEqual)
 
   useEffect(() => {
-    initializeOpenAIAPI(auth.apiKey);
-  }, [auth.apiKey]);
-
-  // useEffect(() => {
-  //   dispatch(updateScreenMessages({ screenId: screen.id, messageIds: messages.map(m => m.id) }))
-  // }, [messages.length])
-
-  const handleScroll = (event: any) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const contentHeight = event.nativeEvent.contentSize.height;
-    const layoutHeight = event.nativeEvent.layoutMeasurement.height;
-
-    if (offsetY < contentHeight - layoutHeight) {
-      setTravelEndButton(true);
-    } else {
-      setTravelEndButton(false);
+    if (auth.isAuthorized) {
+      initializeOpenAIAPI(auth.apiKey)
     }
-  };
+  }, [auth.apiKey])
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y
+    const contentHeight = event.nativeEvent.contentSize.height
+    const layoutHeight = event.nativeEvent.layoutMeasurement.height
+
+    offsetY < contentHeight - layoutHeight ? setTravelEndButton(true) : setTravelEndButton(false)
+  }
 
   const ChatAreaInputProps = {
     flatListRef: flatListRef,
     travelEndButton: travelEndButton,
-    ...props,
-  };
+    screen: screen,
+  }
 
   return (
     <View style={styles.chatArea}>
@@ -58,12 +49,8 @@ function ChatArea({ ...props }) {
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item }) => <MessageItem message={item} />}
             contentContainerStyle={styles.messagesList}
-            onContentSizeChange={() =>
-              flatListRef.current?.scrollToEnd({ animated: true })
-            }
-            onLayout={() =>
-              flatListRef.current?.scrollToEnd({ animated: true })
-            }
+            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
             ListFooterComponent={<View style={styles.listFooter}></View>}
           />
         </View>
@@ -72,7 +59,7 @@ function ChatArea({ ...props }) {
       )}
       {auth.isAuthorized && <ChatAreaInput {...ChatAreaInputProps} />}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -133,6 +120,6 @@ const styles = StyleSheet.create({
     marginRight: 20,
     height: 50,
   },
-});
+})
 
-export default ChatArea;
+export default React.memo(ChatArea)

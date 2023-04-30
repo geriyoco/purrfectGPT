@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react"
 import {
   View,
   TextInput,
@@ -7,56 +7,74 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
   Keyboard,
-} from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { getBotResponse, extractBotMessage } from "../services/openai";
-import { selectAllMessages, addMessage } from "../redux/messageSlice";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../redux/store";
+} from "react-native"
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
+import { getBotResponse, extractBotMessage } from "../services/openai"
+import { selectMessagesByScreenId, addMessage, editMessage } from "../redux/messageSlice"
+import { useSelector, useDispatch } from "react-redux"
+import { RootState } from "../redux/store"
+import { useQuery } from "@tanstack/react-query"
+import { v4 as uuidv4 } from "uuid"
+import isEqual from "lodash/isEqual"
 
-export interface ExtendedTextInputKeyPressEventData
-  extends TextInputKeyPressEventData {
-  shiftKey?: boolean;
+export interface ExtendedTextInputKeyPressEventData extends TextInputKeyPressEventData {
+  shiftKey?: boolean
 }
 
 function ChatAreaInput({ ...props }) {
-  const { screen, flatListRef, travelEndButton } = props;
-  const [currentMessage, setCurrentMessage] = useState("");
-  const inputRef = useRef<TextInput>(null);
-  const dispatch = useDispatch();
-  const messages = useSelector((state: RootState) =>
-    selectAllMessages(state, screen.id)
-  );
+  const { screen, flatListRef, travelEndButton } = props
+  const [currentMessage, setCurrentMessage] = useState("")
+  const [newMessageId, setNewMessageId] = useState("")
+  const inputRef = useRef<TextInput>(null)
+  const dispatch = useDispatch()
+  const messages = useSelector((state: RootState) => selectMessagesByScreenId(state, screen.id), isEqual)
+
+  const { isFetching, refetch } = useQuery(["getBotMessage"], () => getBotResponse(currentMessage, messages), {
+    enabled: false,
+    onSuccess: (botResponse) => {
+      dispatch(
+        editMessage({
+          id: newMessageId,
+          screenId: screen.id,
+          isLoading: false,
+          isError: false,
+          ...extractBotMessage(botResponse),
+        })
+      )
+    },
+    onError: () => {
+      dispatch(editMessage({ id: newMessageId, screenId: screen.id, isLoading: false, isError: true }))
+    },
+  })
+
+  useEffect(() => {
+    isFetching && dispatch(addMessage({ id: newMessageId, screenId: screen.id, isLoading: true, isError: false }))
+  }, [isFetching])
 
   const handleSend = () => {
     dispatch(
-      addMessage({ screenId: screen.id, text: currentMessage, isBot: false })
-    );
+      addMessage({
+        id: uuidv4(),
+        screenId: screen.id,
+        text: currentMessage,
+        isBot: false,
+        isLoading: false,
+        isError: false,
+      })
+    )
+    setNewMessageId(uuidv4())
+    refetch()
+    setCurrentMessage("")
+    inputRef.current?.focus()
+  }
 
-    const botResponsePromise = getBotResponse(currentMessage, messages);
-    botResponsePromise.then((botResponse) => {
-      dispatch(
-        addMessage({ screenId: screen.id, ...extractBotMessage(botResponse) })
-      );
-    });
-
-    setCurrentMessage("");
-    inputRef.current?.focus();
-  };
-
-  const handleKeyDown = (
-    e: NativeSyntheticEvent<ExtendedTextInputKeyPressEventData>
-  ) => {
-    if (
-      e.nativeEvent.key === "Enter" &&
-      currentMessage &&
-      !e.nativeEvent.shiftKey
-    ) {
-      e.preventDefault();
-      Keyboard.dismiss();
-      handleSend();
+  const handleKeyDown = (e: NativeSyntheticEvent<ExtendedTextInputKeyPressEventData>) => {
+    if (e.nativeEvent.key === "Enter" && currentMessage && !e.nativeEvent.shiftKey) {
+      e.preventDefault()
+      Keyboard.dismiss()
+      handleSend()
     }
-  };
+  }
 
   return (
     <View style={styles.bottomContainer}>
@@ -66,11 +84,7 @@ function ChatAreaInput({ ...props }) {
             style={styles.endButton}
             onPress={() => flatListRef.current?.scrollToEnd({ animated: true })}
           >
-            <MaterialCommunityIcons
-              name="arrow-down-circle"
-              size={25}
-              color="#fff"
-            />
+            <MaterialCommunityIcons name="arrow-down-circle" size={25} color="#fff" />
           </TouchableOpacity>
         )}
       </View>
@@ -85,16 +99,12 @@ function ChatAreaInput({ ...props }) {
           onChangeText={setCurrentMessage}
           onKeyPress={handleKeyDown}
         />
-        <TouchableOpacity
-          disabled={!currentMessage}
-          style={styles.sendButton}
-          onPress={handleSend}
-        >
+        <TouchableOpacity disabled={!currentMessage} style={styles.sendButton} onPress={handleSend}>
           <MaterialCommunityIcons name="send" size={16} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -138,6 +148,6 @@ const styles = StyleSheet.create({
     marginRight: 20,
     height: 50,
   },
-});
+})
 
-export default ChatAreaInput;
+export default ChatAreaInput

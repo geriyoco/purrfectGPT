@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from "react"
 import {
   Dimensions,
   StyleSheet,
@@ -11,53 +11,96 @@ import {
   TextInput,
   NativeSyntheticEvent,
   Keyboard,
-} from "react-native";
-import Clipboard from "@react-native-clipboard/clipboard";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import FeatherIcons from "react-native-vector-icons/Feather";
-import { CreateCompletionResponseUsage } from "openai";
-import { getPricing } from "../services/openai";
-import { removeMessage, updateMessage } from "../redux/messageSlice";
-import { useDispatch } from "react-redux";
-import { ExtendedTextInputKeyPressEventData } from "./ChatAreaInput";
+  ActivityIndicator,
+} from "react-native"
+import Clipboard from "@react-native-clipboard/clipboard"
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
+import FeatherIcons from "react-native-vector-icons/Feather"
+import EntypoIcons from "react-native-vector-icons/Entypo"
+import { CreateCompletionResponseUsage } from "openai"
+import { getPricing } from "../services/openai"
+import { removeMessage, updateMessage } from "../redux/messageSlice"
+import { useDispatch } from "react-redux"
+import { ExtendedTextInputKeyPressEventData } from "./ChatAreaInput"
 
 function MessageItem({ ...props }) {
-  const { id, isBot, text, created, model, usage } = props.message;
-  const [metadataVisible, setMetadataVisible] = useState(false);
-  const handleLongPress = () => setMetadataVisible(true);
-  const handleCloseMetadata = () => setMetadataVisible(false);
-  const [edit, setEdit] = useState(false);
-  const [deleteMode, setDeleteMode] = useState(false);
-  const [editText, setEditText] = useState(text);
-  const [height, setHeight] = useState(0);
-  const dispatch = useDispatch();
+  const { id, isBot, text, created, model, usage, isLoading, isError } = props.message
+  const [metadataVisible, setMetadataVisible] = useState(false)
+  const handleLongPress = () => setMetadataVisible(true)
+  const handleCloseMetadata = () => setMetadataVisible(false)
+  const [height, setHeight] = useState(0)
+  const [actions, setActions] = useState(false)
+  const [editAction, setEditAction] = useState(false)
+  const [deleteAction, setDeleteAction] = useState(false)
+  const [editText, setEditText] = useState(text)
+  const dispatch = useDispatch()
 
   const copyToClipboard = () => {
-    Clipboard.setString(text);
-  };
-
-  const editMessage = () => {
-    dispatch(updateMessage({ messageId: id, text: editText }));
-    setEdit(false);
-  };
-
-  const handleKeyDown = (
-    e: NativeSyntheticEvent<ExtendedTextInputKeyPressEventData>
-  ) => {
-    if (e.nativeEvent.key === "Enter" && editText) {
-      e.preventDefault();
-      Keyboard.dismiss();
-      editMessage();
-    }
-  };
+    Clipboard.setString(text)
+  }
 
   const deleteMessage = () => {
-    dispatch(removeMessage({ messageId: id }));
-    setDeleteMode(false);
-  };
+    dispatch(removeMessage({ messageId: id }))
+  }
+
+  const editMessage = () => {
+    dispatch(updateMessage({ messageId: id, text: editText }))
+  }
+
+  const handleKeyDown = (e: NativeSyntheticEvent<ExtendedTextInputKeyPressEventData>) => {
+    if (e.nativeEvent.key === "Enter" && editText) {
+      e.preventDefault()
+      Keyboard.dismiss()
+      editMessage()
+    }
+  }
 
   const updateSize = (height: number) => {
-    setHeight(height);
+    setHeight(height)
+  }
+
+  const confirmAction = () => {
+    editAction && editMessage()
+    deleteAction && deleteMessage()
+    setActions(false)
+    setEditAction(false)
+    setDeleteAction(false)
+  }
+
+  const editMode = () => {
+    setActions(true)
+    setEditAction(true)
+    setDeleteAction(false)
+  }
+
+  const deleteMode = () => {
+    setActions(true)
+    setDeleteAction(true)
+    setEditAction(false)
+  }
+
+  const renderIcon = () => {
+    if (isLoading) {
+      return <ActivityIndicator size="small" color="purple" />
+    }
+    if (isError) {
+      return (
+        <MaterialCommunityIcons
+          name={isBot ? "robot-dead-outline" : "face-man"}
+          style={styles.profileIcon}
+          size={20}
+          color="#fff"
+        />
+      )
+    }
+    return (
+      <MaterialCommunityIcons
+        name={isBot ? "robot-outline" : "face-man"}
+        style={styles.profileIcon}
+        size={20}
+        color="#fff"
+      />
+    )
   }
 
   return (
@@ -65,18 +108,10 @@ function MessageItem({ ...props }) {
       <TouchableOpacity
         activeOpacity={isBot ? 0.2 : 1}
         onLongPress={isBot ? handleLongPress : undefined}
-        style={[
-          styles.messageItem,
-          isBot ? styles.botMessage : styles.userMessage,
-        ]}
+        style={[styles.messageItem, isBot ? styles.botMessage : styles.userMessage]}
       >
-        <MaterialCommunityIcons
-          name={isBot ? "robot-outline" : "face-man"}
-          style={styles.profileIcon}
-          size={20}
-          color="#fff"
-        />
-        {edit ? (
+        {renderIcon()}
+        {editAction ? (
           <TextInput
             style={[styles.textMessage, { height: height }]}
             autoFocus
@@ -88,38 +123,32 @@ function MessageItem({ ...props }) {
             onKeyPress={handleKeyDown}
           />
         ) : (
-          <Text style={styles.textMessage}>{text}</Text>
+          <Text selectable={true} style={styles.textMessage}>
+            {text}
+          </Text>
         )}
         <TouchableOpacity onPress={copyToClipboard}>
-          <MaterialCommunityIcons
-            name="content-copy"
-            style={styles.profileIcon}
-            size={20}
-            color="#fff"
-          />
+          <MaterialCommunityIcons name="content-copy" style={styles.profileIcon} size={20} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => (edit ? editMessage() : setEdit(!edit))}
-        >
-          <FeatherIcons
-            name={edit ? "check" : "edit-3"}
-            style={styles.profileIcon}
-            size={20}
-            color="#fff"
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() =>
-            deleteMode ? deleteMessage() : setDeleteMode(!deleteMode)
-          }
-        >
-          <FeatherIcons
-            name={deleteMode ? "check" : "trash-2"}
-            style={styles.profileIcon}
-            size={20}
-            color="#fff"
-          />
-        </TouchableOpacity>
+        {actions ? (
+          <>
+            <TouchableOpacity onPress={() => confirmAction()}>
+              <FeatherIcons name={"check"} style={styles.profileIcon} size={20} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setActions(false)}>
+              <EntypoIcons name={"cross"} style={styles.profileIcon} size={20} color="#fff" />
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity onPress={() => editMode()}>
+              <FeatherIcons name="edit-3" style={styles.profileIcon} size={20} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => deleteMode()}>
+              <FeatherIcons name="trash-2" style={styles.profileIcon} size={20} color="#fff" />
+            </TouchableOpacity>
+          </>
+        )}
       </TouchableOpacity>
 
       <MetadataPopup
@@ -130,33 +159,26 @@ function MessageItem({ ...props }) {
         usage={usage}
       />
     </>
-  );
+  )
 }
 
 function MetadataPopup(props: {
-  visible: boolean;
-  onClose: () => void;
-  created: number | undefined;
-  model: string | undefined;
-  usage: CreateCompletionResponseUsage | undefined;
+  visible: boolean
+  onClose: () => void
+  created: number | undefined
+  model: string | undefined
+  usage: CreateCompletionResponseUsage | undefined
 }) {
-  const created = props.created
-    ? new Date(props.created * 1000).toLocaleString()
-    : "No date provided";
-  const model = props.model ? props.model : "No model provided";
+  const created = props.created ? new Date(props.created * 1000).toLocaleString() : "No date provided"
+  const model = props.model ? props.model : "No model provided"
   const usageData = {
     Prompt: props.usage ? props.usage.prompt_tokens : 0,
     Completion: props.usage ? props.usage.completion_tokens : 0,
     Total: props.usage ? props.usage.total_tokens : 0,
-  };
+  }
 
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={props.visible}
-      onRequestClose={props.onClose}
-    >
+    <Modal animationType="fade" transparent={true} visible={props.visible} onRequestClose={props.onClose}>
       <TouchableWithoutFeedback onPress={props.onClose}>
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback>
@@ -176,17 +198,13 @@ function MetadataPopup(props: {
                 <FlatList
                   data={Object.entries(usageData)}
                   renderItem={({ item }) => {
-                    const [key, value] = item;
+                    const [key, value] = item
                     return (
                       <View style={styles.usageItem}>
                         <Text style={styles.usageKey}>{key + ":"}</Text>
-                        <Text
-                          style={styles.usageValue}
-                        >{`${value} (USD ${getPricing(model, value).toFixed(
-                          6
-                        )})`}</Text>
+                        <Text style={styles.usageValue}>{`${value} (USD ${getPricing(model, value).toFixed(6)})`}</Text>
                       </View>
-                    );
+                    )
                   }}
                 />
               </View>
@@ -195,10 +213,10 @@ function MetadataPopup(props: {
         </View>
       </TouchableWithoutFeedback>
     </Modal>
-  );
+  )
 }
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get("window")
 const styles = StyleSheet.create({
   messageItem: {
     flex: 1,
@@ -256,6 +274,6 @@ const styles = StyleSheet.create({
     textAlign: "right",
     marginLeft: 15,
   },
-});
+})
 
-export default MessageItem;
+export default MessageItem

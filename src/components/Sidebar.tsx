@@ -1,34 +1,33 @@
-import React from "react";
-import { StyleSheet, useWindowDimensions } from "react-native";
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import ChatArea from "./ChatArea";
-import SidebarDrawerContent from "./SidebarDrawerContent";
-import { useSelector } from "react-redux";
-import { selectAllScreens } from "../redux/screenSlice";
+import React from "react"
+import { StyleSheet, useWindowDimensions } from "react-native"
+import { createDrawerNavigator } from "@react-navigation/drawer"
+import ChatArea from "./ChatArea"
+import SidebarDrawerContent from "./SidebarDrawerContent"
+import { useSelector } from "react-redux"
+import { selectAllScreens } from "../redux/screenSlice"
 
 function Sidebar() {
-  const Drawer = createDrawerNavigator();
-  const { width } = useWindowDimensions();
-  const isLargeScreen = width >= 768;
-  const screens = useSelector(selectAllScreens);
+  const Drawer = createDrawerNavigator()
+  const { width } = useWindowDimensions()
+  const isLargeScreen = width >= 768
+  const screens = useSelector(selectAllScreens)
 
   return (
     <Drawer.Navigator
       useLegacyImplementation
       backBehavior="history"
       initialRouteName="Feed"
-      drawerContent={(props) => <SidebarDrawerContent {...props} />}
+      drawerContent={({ navigation }) => <SidebarDrawerContent navigation={navigation} />}
       screenOptions={{
         drawerType: isLargeScreen ? "permanent" : "front",
-        drawerStyle: isLargeScreen
-          ? styles.drawerStyleLargeScreen
-          : styles.drawerStyleSmallScreen,
+        drawerStyle: isLargeScreen ? styles.drawerStyleLargeScreen : styles.drawerStyleSmallScreen,
         drawerActiveTintColor: "white",
       }}
     >
       {screens &&
         screens.map((screen) => (
           <Drawer.Screen
+            // navigationKey={screen.id}
             key={screen.id}
             name={screen.id}
             children={() => <ChatArea screen={screen} />}
@@ -42,7 +41,7 @@ function Sidebar() {
           />
         ))}
     </Drawer.Navigator>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -64,6 +63,6 @@ const styles = StyleSheet.create({
     color: "white",
     textOverflow: "ellipsis",
   },
-});
+})
 
-export default Sidebar;
+export default Sidebar
