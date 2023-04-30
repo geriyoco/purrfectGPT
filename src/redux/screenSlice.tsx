@@ -1,17 +1,17 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { RootState } from "./store";
-import { v4 as uuidv4 } from "uuid";
+import { createSlice } from "@reduxjs/toolkit"
+import { RootState } from "./store"
+import { v4 as uuidv4 } from "uuid"
 
 export interface Screen {
-  id: string;
-  title: string;
-  folderId: string;
-  edit: boolean;
-  focus: boolean;
-  messages: string[];
+  id: string
+  title: string
+  folderId: string
+  edit: boolean
+  focus: boolean
+  messages: string[]
 }
 
-const initialId = uuidv4();
+const initialId = uuidv4()
 const initialState = {
   lastAddedScreenId: initialId,
   entities: [
@@ -24,7 +24,7 @@ const initialState = {
       messages: [],
     },
   ],
-};
+}
 
 const screenSlice = createSlice({
   name: "screens",
@@ -32,7 +32,7 @@ const screenSlice = createSlice({
   reducers: {
     addScreen: (state) => {
       // const chatId = action.payload
-      const chatId = uuidv4();
+      const chatId = uuidv4()
       state.entities.push({
         id: chatId,
         title: `New Chat`,
@@ -40,11 +40,11 @@ const screenSlice = createSlice({
         edit: false,
         focus: true,
         messages: [],
-      });
-      state.lastAddedScreenId = chatId;
+      })
+      state.lastAddedScreenId = chatId
     },
     updateScreen: (state, action) => {
-      const { id, title, folderId } = action.payload;
+      const { id, title, folderId } = action.payload
       return {
         ...state,
         entities: state.entities.map((screen) =>
@@ -57,39 +57,33 @@ const screenSlice = createSlice({
               }
             : screen
         ),
-      };
+      }
     },
     removeScreen: (state, action) => {
       return {
         ...state,
-        entities: state.entities.filter(
-          (screen) => screen.id !== action.payload
-        ),
+        entities: state.entities.filter((screen) => screen.id !== action.payload),
         lastAddedScreenId: "",
-      };
+      }
     },
     toggleEdit: (state, action) => {
       return {
         ...state,
         entities: state.entities.map((screen) =>
-          screen.id === action.payload
-            ? { ...screen, edit: !screen.edit }
-            : { ...screen, edit: false }
+          screen.id === action.payload ? { ...screen, edit: !screen.edit } : { ...screen, edit: false }
         ),
-      };
+      }
     },
     toggleFocus: (state, action) => {
       return {
         ...state,
         entities: state.entities.map((screen) =>
-          screen.id === action.payload
-            ? { ...screen, focus: true }
-            : { ...screen, focus: false }
+          screen.id === action.payload ? { ...screen, focus: true } : { ...screen, focus: false }
         ),
-      };
+      }
     },
     updateScreenFolders: (state, action) => {
-      const { id, chatIds } = action.payload;
+      const { id, chatIds } = action.payload
       return {
         ...state,
         entities: state.entities.map((screen) =>
@@ -97,29 +91,25 @@ const screenSlice = createSlice({
             ? { ...screen, folderId: id, edit: false }
             : { ...screen, folderId: "", edit: false }
         ),
-      };
+      }
     },
     removeFolderFromScreens: (state, action) => {
       return {
         ...state,
-        entities: state.entities.filter(
-          (screen) => screen.folderId !== action.payload
-        ),
-      };
+        entities: state.entities.filter((screen) => screen.folderId !== action.payload),
+      }
     },
     updateScreenMessages: (state, action) => {
-      const { screenId, messageIds } = action.payload;
+      const { screenId, messageIds } = action.payload
       return {
         ...state,
         entities: state.entities.map((screen) =>
-          screen.id === screenId
-            ? { ...screen, messages: messageIds }
-            : { ...screen }
+          screen.id === screenId ? { ...screen, messages: messageIds } : { ...screen }
         ),
-      };
+      }
     },
     removeAllScreens: (state) => {
-      const chatId = uuidv4();
+      const chatId = uuidv4()
       return {
         ...state,
         entities: [
@@ -133,23 +123,23 @@ const screenSlice = createSlice({
           },
         ],
         lastAddedScreenId: chatId,
-      };
+      }
     },
     addScreens: (state, action) => {
-      const screens = action.payload;
+      const screens = action.payload
       return {
         ...state,
         ...screens,
-      };
+      }
     },
   },
-});
+})
 
-export const selectAllScreens = (state: RootState) => state.screens.entities;
+export const selectAllScreens = (state: RootState) => state.screens.entities
 export const selectScreenById = (state: RootState, screenId: string) =>
-  state.screens.entities.find((screen) => screen.id === screenId);
-export const selectLastCreatedScreen = (state: RootState) =>
-  state.screens.lastAddedScreenId;
+  state.screens.entities.find((screen) => screen.id === screenId)
+export const selectLastCreatedScreen = (state: RootState) => state.screens.lastAddedScreenId
+export const selectFirstScreenId = (state: RootState) => state.screens.entities[0].id
 
 // Export the slice's reducer and actions
 export const {
@@ -163,5 +153,5 @@ export const {
   updateScreenMessages,
   removeAllScreens,
   addScreens,
-} = screenSlice.actions;
-export default screenSlice.reducer;
+} = screenSlice.actions
+export default screenSlice.reducer
