@@ -3,42 +3,50 @@ import { StyleSheet, TouchableOpacity, View, Text, useWindowDimensions } from "r
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 import AntDesign from "react-native-vector-icons/AntDesign"
 import { useSelector, useDispatch } from "react-redux"
-import { selectAllScreens, addScreen, removeAllScreens, addScreens, toggleFocus } from "../redux/screenSlice"
-import { selectAllFolders, addFolder, removeAllFolders, addFolders } from "../redux/folderSlice"
+import { addScreen, removeAllScreens, addScreens, selectScreenIdsFolderIds } from "../redux/screenSlice"
+import { selectFolderIds, addFolder, removeAllFolders, addFolders } from "../redux/folderSlice"
 import { addMessages, removeAllMessages } from "../redux/messageSlice"
 import { saveAs } from "file-saver"
-import { store } from "../redux/store"
+import { RootState, store } from "../redux/store"
 import SidebarChat from "./SidebarChat"
 import SidebarFolder from "./SidebarFolder"
-import { v4 as uuidv4 } from "uuid"
+import isEqual from "lodash/isEqual"
+import cloneDeep from "lodash/cloneDeep"
+import CustomViewStyle from "../types/CustomViewStyle"
 
 function SidebarDrawerContent({ ...props }) {
   const { navigation } = props
   const dispatch = useDispatch()
-  const { height, width } = useWindowDimensions()
+  const { height } = useWindowDimensions()
   const fileInputRef: React.Ref<HTMLInputElement> = useRef(null)
-  const screens = useSelector(selectAllScreens)
-  const folders = useSelector(selectAllFolders)
+  const screenIdsFolderIds = useSelector(selectScreenIdsFolderIds, isEqual)
+  const folderIds = useSelector(selectFolderIds, isEqual)
 
-  const handleFileChange = (event: any) => {
+  const fetchFileURI = async (fileData: string) => {
+    const response = await fetch(fileData)
+    const data = await response.json()
+    dispatch(addMessages(data.messages))
+    dispatch(addFolders(data.folders))
+    dispatch(addScreens(data.screens))
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) return
+
     const selectedFile = event.target.files[0]
+    if (!selectedFile) return
+
     const reader = new FileReader()
     reader.readAsDataURL(selectedFile)
     reader.onload = () => {
       const fileData = reader.result as string
       if (fileData) {
-        ;(async function () {
-          const response = await fetch(fileData)
-          const data = await response.json()
-          dispatch(addMessages(data.messages))
-          dispatch(addFolders(data.folders))
-          dispatch(addScreens(data.screens))
-        })()
+        fetchFileURI(fileData)
       }
     }
   }
 
-  const downloadState = (state: any) => {
+  const downloadState = (state: RootState) => {
     const jsonState = JSON.stringify(state)
     const file = new Blob([jsonState], { type: "application/json" })
     const now = new Date().toISOString()
@@ -47,9 +55,10 @@ function SidebarDrawerContent({ ...props }) {
 
   const exportChat = () => {
     const state = store.getState()
-    delete state.auth
-    delete state._persist
-    downloadState(state)
+    const stateCopy = cloneDeep(state)
+    delete stateCopy.auth
+    delete stateCopy._persist
+    downloadState(stateCopy)
   }
   const importChat = () => {
     if (fileInputRef && fileInputRef.current) {
@@ -74,19 +83,19 @@ function SidebarDrawerContent({ ...props }) {
       </View>
       <View style={styles.divider} />
       <View style={[styles.drawerContentScrollView]}>
-        {folders && folders.map((folder) => <SidebarFolder key={folder.id} folder={folder} navigation={navigation} />)}
-        {screens.map((screen) => {
-          if (!screen.folderId) {
-            return <SidebarChat key={screen.id} screen={screen} navigation={navigation} />
-          }
-          return null
+        {folderIds &&
+          folderIds.map((folderId) => <SidebarFolder key={folderId} folderId={folderId} navigation={navigation} />)}
+        {screenIdsFolderIds.map((screenIdFolderId) => {
+          return (
+            <SidebarChat key={screenIdFolderId.screenId} screenId={screenIdFolderId.screenId} navigation={navigation} />
+          )
         })}
       </View>
       <View style={styles.divider} />
       <View style={styles.importExport}>
         <TouchableOpacity style={[styles.button, styles.importButton, styles.footerButtons]} onPress={importChat}>
-          <MaterialCommunityIcons name="file-import-outline" size={20} color="white" />
-          <Text>Import</Text>
+          <MaterialCommunityIcons style={styles.bottomIcons} name="file-import-outline" size={20} color="white" />
+          <Text style={styles.footerText}>Import</Text>
           <input
             ref={fileInputRef}
             id="files"
@@ -96,13 +105,13 @@ function SidebarDrawerContent({ ...props }) {
           />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.exportButton, styles.footerButtons]} onPress={exportChat}>
-          <MaterialCommunityIcons name="file-export-outline" size={20} color="white" />
-          <Text>Export</Text>
+          <MaterialCommunityIcons style={styles.bottomIcons} name="file-export-outline" size={20} color="white" />
+          <Text style={styles.footerText}>Export</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={[styles.button, styles.clearButton, styles.footerButtons]} onPress={removeAllChat}>
-        <MaterialCommunityIcons name="trash-can-outline" size={20} color="white" />
-        <Text>Clear Conversations</Text>
+        <MaterialCommunityIcons style={styles.bottomIcons} name="trash-can-outline" size={20} color="white" />
+        <Text style={styles.footerText}>Clear Conversations</Text>
       </TouchableOpacity>
     </View>
   )
@@ -117,7 +126,7 @@ const styles = StyleSheet.create({
     overflowY: "auto",
     flex: 1,
     margin: 10,
-  },
+  } as CustomViewStyle,
   newChat: {
     flexDirection: "row",
     justifyContent: "space-evenly",
@@ -132,10 +141,10 @@ const styles = StyleSheet.create({
   },
   addChat: {
     backgroundImage: "linear-gradient(to right, #4776E6 0%, #8E54E9  51%, #4776E6  100%)",
-  },
+  } as CustomViewStyle,
   addFolder: {
     backgroundImage: "linear-gradient(to right, #f857a6 0%, #ff5858  51%, #f857a6  100%)",
-  },
+  } as CustomViewStyle,
   divider: {
     height: 1,
     width: "90%",
@@ -146,17 +155,17 @@ const styles = StyleSheet.create({
   importButton: {
     flex: 1,
     marginLeft: 20,
-    backgroundImage: "linear-gradient(0deg, #4776E6 0%, #8E54E9  51%)",
-  },
+    backgroundImage: "linear-gradient(180deg, #000000 0%, #4776E6 )",
+  } as CustomViewStyle,
   exportButton: {
     flex: 1,
     marginRight: 20,
-    backgroundImage: "linear-gradient(0deg, #4776E6 0%, #8E54E9  51%)",
-  },
+    backgroundImage: "linear-gradient(180deg, #000000 0%, #8E54E9 )",
+  } as CustomViewStyle,
   clearButton: {
     marginHorizontal: 20,
-    backgroundImage: "linear-gradient(0deg, #4776E6 0%, #8E54E9  51%)",
-  },
+    backgroundImage: "linear-gradient(180deg, #000000 0%, #f857a6 )",
+  } as CustomViewStyle,
   importExport: {
     justifyContent: "space-evenly",
     flexDirection: "row",
@@ -168,6 +177,12 @@ const styles = StyleSheet.create({
   fileUpload: {
     display: "none",
   },
+  bottomIcons: {
+    marginRight: 2,
+  },
+  footerText: {
+    color: "white",
+  },
 })
 
-export default SidebarDrawerContent
+export default React.memo(SidebarDrawerContent)

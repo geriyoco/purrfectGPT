@@ -67,6 +67,13 @@ function MessageItem({ ...props }) {
     setDeleteAction(false)
   }
 
+  const refuseAction = () => {
+    setActions(false)
+    setEditText("")
+    setEditAction(false)
+    setDeleteAction(false)
+  }
+
   const editMode = () => {
     setActions(true)
     setEditAction(true)
@@ -135,7 +142,7 @@ function MessageItem({ ...props }) {
             <TouchableOpacity onPress={() => confirmAction()}>
               <FeatherIcons name={"check"} style={styles.profileIcon} size={20} color="#fff" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setActions(false)}>
+            <TouchableOpacity onPress={() => refuseAction()}>
               <EntypoIcons name={"cross"} style={styles.profileIcon} size={20} color="#fff" />
             </TouchableOpacity>
           </>

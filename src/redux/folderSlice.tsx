@@ -1,137 +1,83 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { RootState } from "./store";
-import { v4 as uuidv4 } from "uuid";
+import { createSelector, createSlice } from "@reduxjs/toolkit"
+import { RootState } from "./store"
+import { v4 as uuidv4 } from "uuid"
 
 export interface Folder {
-  id: string;
-  title: string;
-  edit: boolean;
-  expand: boolean;
-  chatIds: string[];
+  id: string
+  title: string
+  edit: boolean
+  expand: boolean
 }
 
 const folderSlice = createSlice({
   name: "folders",
   initialState: {
-    entities: [] as Folder[],
+    entities: {} as Record<string, Folder>,
+    ids: [] as string[],
   },
   reducers: {
     addFolder: (state) => {
-      const chatId = uuidv4();
-      state.entities.push({
-        id: chatId,
-        title: `New Folder`,
-        chatIds: [],
+      const folderId = uuidv4()
+      state.entities[folderId] = {
+        id: folderId,
+        title: "New Folder",
         edit: false,
         expand: false,
-      });
+      }
+      state.ids.push(folderId)
     },
     updateFolder: (state, action) => {
-      const { id, title, chatIds } = action.payload;
-      return {
-        ...state,
-        entities: state.entities.map((folder) =>
-          folder.id === id
-            ? {
-                ...folder,
-                title: title ? title : folder.title,
-                chatIds: chatIds,
-                edit: false,
-              }
-            : folder
-        ),
-      };
+      const { id, title } = action.payload
+      const folder = state.entities[id]
+      if (folder) {
+        folder.title = title ? title : folder.title
+        folder.edit = false
+      }
     },
     removeFolder: (state, action) => {
-      return {
-        ...state,
-        entities: state.entities.filter(
-          (folder) => folder.id !== action.payload
-        ),
-      };
+      const folderId = action.payload
+      delete state.entities[folderId]
+      state.ids = state.ids.filter((id) => id !== folderId)
     },
     toggleEdit: (state, action) => {
-      return {
-        ...state,
-        entities: state.entities.map((folder) =>
-          folder.id === action.payload
-            ? { ...folder, edit: !folder.edit }
-            : { ...folder, edit: false }
-        ),
-      };
+      const folderId = action.payload
+      const folder = state.entities[folderId]
+      if (folder) {
+        folder.edit = !folder.edit
+      }
     },
     toggleExpand: (state, action) => {
-      return {
-        ...state,
-        entities: state.entities.map((folder) =>
-          folder.id === action.payload
-            ? { ...folder, expand: !folder.expand }
-            : { ...folder, expand: false }
-        ),
-      };
-    },
-    updateScreensInFolders: (state, action) => {
-      const { screenId, folderId } = action.payload;
-      return {
-        ...state,
-        entities: state.entities.map((folder) =>
-          folder.id === folderId
-            ? {
-                ...folder,
-                chatIds: !folder.chatIds.includes(screenId)
-                  ? [...folder.chatIds, screenId]
-                  : folder.chatIds,
-                expand: true,
-              }
-            : {
-                ...folder,
-                chatIds: folder.chatIds.filter((id) => id !== screenId),
-              }
-        ),
-      };
-    },
-    removeScreensInFolder: (state, action) => {
-      const { screenId, folderId } = action.payload;
-      return {
-        ...state,
-        entities: state.entities.map((folder) =>
-          folder.id === folderId
-            ? {
-                ...folder,
-                chatIds: folder.chatIds.filter((id) => id !== screenId),
-              }
-            : folder
-        ),
-      };
-    },
-    removeAllFolders: (state) => {
-      return {
-        ...state,
-        entities: [],
-      };
+      const folderId = action.payload
+      const folder = state.entities[folderId]
+      if (folder) {
+        folder.expand = !folder.expand
+      }
     },
     addFolders: (state, action) => {
-      const folders = action.payload;
-      return {
-        ...state,
-        ...folders,
-      };
+      const folders = action.payload
+      state.entities = { ...state.entities, ...folders.entities }
+      state.ids = folders.ids
+    },
+    removeAllFolders: (state) => {
+      state.entities = {}
+      state.ids = []
     },
   },
-});
+})
 
-export const selectAllFolders = (state: RootState) => state.folders.entities;
+export const selectFolderEntities = (state: RootState) => state.folders.entities
+export const selectFolderIds = (state: RootState) => state.folders.ids
+export const selectFolderById = createSelector(
+  [selectFolderEntities, (state, folderId) => folderId],
+  (entities, folderId) => entities[folderId]
+)
+export const selectFolderIdTitles = createSelector(selectFolderEntities, (entities) => {
+  return Object.values(entities).map((folder) => {
+    return { id: folder.id, title: folder.title }
+  })
+})
 
-// Export the slice's reducer and actions
-export const {
-  addFolder,
-  updateFolder,
-  removeFolder,
-  toggleEdit,
-  toggleExpand,
-  updateScreensInFolders,
-  removeScreensInFolder,
-  removeAllFolders,
-  addFolders,
-} = folderSlice.actions;
-export default folderSlice.reducer;
+export const { addFolder, updateFolder, removeFolder, toggleEdit, toggleExpand, removeAllFolders, addFolders } =
+  folderSlice.actions
+
+export default folderSlice.reducer
