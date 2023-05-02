@@ -11,11 +11,11 @@ import { RootState } from "../redux/store"
 import isEqual from "lodash/isEqual"
 
 function ChatArea({ ...props }) {
-  const { screen } = props
+  const { screenId } = props
+  const messages = useSelector((state: RootState) => selectMessagesByScreenId(state, screenId), isEqual)
   const flatListRef = useRef<FlatList>(null)
   const [travelEndButton, setTravelEndButton] = useState(false)
   const auth = useSelector(selectAuth)
-  const messages = useSelector((state: RootState) => selectMessagesByScreenId(state, screen.id), isEqual)
 
   useEffect(() => {
     if (auth.isAuthorized) {
@@ -29,12 +29,6 @@ function ChatArea({ ...props }) {
     const layoutHeight = event.nativeEvent.layoutMeasurement.height
 
     offsetY < contentHeight - layoutHeight ? setTravelEndButton(true) : setTravelEndButton(false)
-  }
-
-  const ChatAreaInputProps = {
-    flatListRef: flatListRef,
-    travelEndButton: travelEndButton,
-    screen: screen,
   }
 
   return (
@@ -57,7 +51,9 @@ function ChatArea({ ...props }) {
       ) : (
         <ChatHomepage />
       )}
-      {auth.isAuthorized && <ChatAreaInput {...ChatAreaInputProps} />}
+      {auth.isAuthorized && (
+        <ChatAreaInput flatListRef={flatListRef} travelEndButton={travelEndButton} screenId={screenId} />
+      )}
     </View>
   )
 }

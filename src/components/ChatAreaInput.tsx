@@ -22,40 +22,47 @@ export interface ExtendedTextInputKeyPressEventData extends TextInputKeyPressEve
 }
 
 function ChatAreaInput({ ...props }) {
-  const { screen, flatListRef, travelEndButton } = props
+  const { screenId, flatListRef, travelEndButton } = props
   const [currentMessage, setCurrentMessage] = useState("")
   const [newMessageId, setNewMessageId] = useState("")
   const inputRef = useRef<TextInput>(null)
   const dispatch = useDispatch()
-  const messages = useSelector((state: RootState) => selectMessagesByScreenId(state, screen.id), isEqual)
+  const messages = useSelector((state: RootState) => selectMessagesByScreenId(state, screenId), isEqual)
 
-  const { isFetching, refetch } = useQuery(["getBotMessage"], () => getBotResponse(currentMessage, messages), {
-    enabled: false,
-    onSuccess: (botResponse) => {
-      dispatch(
-        editMessage({
-          id: newMessageId,
-          screenId: screen.id,
-          isLoading: false,
-          isError: false,
-          ...extractBotMessage(botResponse),
-        })
-      )
-    },
-    onError: () => {
-      dispatch(editMessage({ id: newMessageId, screenId: screen.id, isLoading: false, isError: true }))
-    },
-  })
+  const { isFetching, refetch } = useQuery(
+    [`getBotMessage${screenId}`],
+    () => getBotResponse(currentMessage, messages),
+    {
+      enabled: false,
+      onSuccess: (botResponse) => {
+        dispatch(
+          editMessage({
+            id: newMessageId,
+            screenId: screenId,
+            isLoading: false,
+            isError: false,
+            ...extractBotMessage(botResponse),
+          })
+        )
+      },
+      onError: () => {
+        dispatch(editMessage({ id: newMessageId, screenId: screenId, isBot: true, isLoading: false, isError: true }))
+      },
+    }
+  )
 
   useEffect(() => {
-    isFetching && dispatch(addMessage({ id: newMessageId, screenId: screen.id, isLoading: true, isError: false }))
-  }, [isFetching])
+    if (isFetching && newMessageId) {
+      isFetching &&
+        dispatch(addMessage({ id: newMessageId, screenId: screenId, isBot: true, isLoading: true, isError: false }))
+    }
+  }, [isFetching, newMessageId])
 
   const handleSend = () => {
     dispatch(
       addMessage({
         id: uuidv4(),
-        screenId: screen.id,
+        screenId: screenId,
         text: currentMessage,
         isBot: false,
         isLoading: false,
@@ -150,4 +157,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default ChatAreaInput
+export default React.memo(ChatAreaInput)

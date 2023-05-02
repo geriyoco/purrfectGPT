@@ -4,13 +4,15 @@ import { createDrawerNavigator } from "@react-navigation/drawer"
 import ChatArea from "./ChatArea"
 import SidebarDrawerContent from "./SidebarDrawerContent"
 import { useSelector } from "react-redux"
-import { selectAllScreens } from "../redux/screenSlice"
+import { selectScreenIds, selectScreenTitle } from "../redux/screenSlice"
+import isEqual from "lodash/isEqual"
+import { RootState } from "../redux/store"
 
 function Sidebar() {
   const Drawer = createDrawerNavigator()
   const { width } = useWindowDimensions()
   const isLargeScreen = width >= 768
-  const screens = useSelector(selectAllScreens)
+  const screenIds = useSelector(selectScreenIds, isEqual)
 
   return (
     <Drawer.Navigator
@@ -24,19 +26,20 @@ function Sidebar() {
         drawerActiveTintColor: "white",
       }}
     >
-      {screens &&
-        screens.map((screen) => (
+      {screenIds &&
+        screenIds.map((screenId) => (
           <Drawer.Screen
-            // navigationKey={screen.id}
-            key={screen.id}
-            name={screen.id}
-            children={() => <ChatArea screen={screen} />}
+            key={screenId}
+            name={screenId}
+            children={() => <ChatArea screenId={screenId} />}
             options={{
               headerShown: !isLargeScreen,
               headerStyle: styles.screenHeader,
               headerTitleStyle: styles.screenHeaderTitle,
               headerTintColor: "purple",
-              title: screen.title,
+              drawerLabel: () => {
+                return useSelector((state: RootState) => selectScreenTitle(state, screenId), isEqual)
+              },
             }}
           />
         ))}

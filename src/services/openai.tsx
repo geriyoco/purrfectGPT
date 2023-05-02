@@ -3,7 +3,7 @@ import { Configuration, OpenAIApi } from "openai"
 import { ChatCompletionRequestMessageRoleEnum, CreateChatCompletionResponse } from "openai"
 import { Message } from "../redux/messageSlice"
 
-type BotResponse = AxiosResponse<CreateChatCompletionResponse, any> | null
+type BotResponse = AxiosResponse<CreateChatCompletionResponse> | null
 
 let openai: OpenAIApi
 

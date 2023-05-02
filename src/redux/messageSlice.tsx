@@ -1,6 +1,5 @@
 import { createSelector, createSlice } from "@reduxjs/toolkit"
 import { RootState } from "./store"
-import { v4 as uuidv4 } from "uuid"
 import { CreateCompletionResponseUsage } from "openai"
 
 // TODO: CreateCompletionResponseUsage is probably non-serializable
@@ -20,7 +19,8 @@ export interface Message {
 const messageSlice = createSlice({
   name: "messages",
   initialState: {
-    entities: [] as Message[],
+    entities: {} as Record<string, Message>,
+    ids: [] as string[],
   },
   reducers: {
     addMessage: (state, action) => {
@@ -36,66 +36,52 @@ const messageSlice = createSlice({
         model: model,
         usage: usage,
       }
-      state.entities.push(message)
-    },
-    addMessages: (state, action) => {
-      const messages = action.payload
-      return {
-        ...state,
-        ...messages,
-      }
+      state.entities[id] = message
+      state.ids.push(id)
     },
     editMessage: (state, action) => {
       const { id, screenId, text, isBot, isLoading, isError, created, model, usage } = action.payload
-      return {
-        ...state,
-        entities: state.entities.map((message) =>
-          message.id === id
-            ? {
-                id: id,
-                screenId: screenId,
-                text: !isError ? text : "ERROR: Bot has encountered an error, please try again",
-                isBot: isBot,
-                isLoading: isLoading,
-                isError: isError,
-                created: created,
-                model: model,
-                usage: usage,
-              }
-            : message
-        ),
+      state.entities[id] = {
+        id: id,
+        screenId: screenId,
+        text: !isError ? text : "ERROR: Bot has is currently experiencing issues, please try again",
+        isBot: isBot,
+        isLoading: isLoading,
+        isError: isError,
+        created: created,
+        model: model,
+        usage: usage,
       }
     },
     updateMessage: (state, action) => {
       const { messageId, text } = action.payload
-      return {
-        ...state,
-        entities: state.entities.map((message) => (message.id === messageId ? { ...message, text: text } : message)),
-      }
+      state.entities[messageId].text = text
     },
     removeMessage: (state, action) => {
       const { messageId } = action.payload
-      return {
-        ...state,
-        entities: state.entities.filter((message) => message.id !== messageId),
-      }
+      delete state.entities[messageId]
+      state.ids = state.ids.filter((id) => id !== messageId)
+    },
+    addMessages: (state, action) => {
+      const messages = action.payload
+      state.entities = { ...state.entities, ...messages.entities }
+      state.ids = messages.ids
     },
     removeAllMessages: (state) => {
-      return {
-        ...state,
-        entities: [],
-      }
+      state.entities = {}
+      state.ids = []
     },
   },
 })
 
 const selectMessages = (state: RootState) => state.messages.entities
 export const selectMessagesByScreenId = createSelector(
-  [selectMessages, (state:RootState, screenId: string) => screenId],
-  (messages: Message[], screenId: string) => messages.filter((message) => message.screenId === screenId)
+  [selectMessages, (state: RootState, screenId: string) => screenId],
+  (messages: Record<string, Message>, screenId: string) => {
+    return Object.values(messages).filter((message) => message.screenId === screenId)
+  }
 )
 
-// Export the slice's reducer and actions
 export const { addMessage, addMessages, updateMessage, removeMessage, removeAllMessages, editMessage } =
   messageSlice.actions
 export default messageSlice.reducer
